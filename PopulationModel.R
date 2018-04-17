@@ -33,7 +33,7 @@ K<-50
 B<-0.5
 
 # have to tell desolve which parameters to care about
-parms<-c(M=M, H=H, sig=sig, t=t, uJ=uJ, B=B, uA=uA, p=p ,r=r, K=K, uR=uR)
+parms<-c(z=z, p=p, sig=sig, M=M, H=H, uJ=uJ, uA=uA, uR=uR, t=t, r=r, K=K, B=B)
 
 #### ODE FUNCTIONS #############################################################
 
