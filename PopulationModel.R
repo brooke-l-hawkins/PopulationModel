@@ -73,24 +73,34 @@ BaseStage<-function(t,y,p){
 
 #### SIMULATION ################################################################
 
-# state variable initial conditions
-J<-1
-A<-5
-R<-10
-y <- c(J,A,R)
-names(y) <- c("Juveniles", "Adults", "Resources")
-
 # duration of simulation
 end.time<-1000
 
 # define how time works for simulation
 days<-(seq(0,end.time,by=0.1))
 
-# run desolve to simulate the model through time (days)
-BS.out<-data.frame(ode(y=y,time=days,func=BaseStage, parms=parms))
-
-matplot(BS.out[,2:4],type="l",lty=1,pch=0.5,col=1:3)
-legend('right', names(y), lty=1,col=1:3, bty = "n")
+# create loop to change initial value of J
+for (j in 1:10) {
+    # create loop to change initial value of A
+    for (a in 1:10) {
+        # state variable initial conditions
+        J<-j
+        A<-a
+        R<-10
+        y <- c(J,A,R)
+        names(y) <- c("Juveniles", "Adults", "Resources")
+        
+        # run desolve to simulate the model through time (days)
+        BS.out<-data.frame(ode(y=y,time=days,func=BaseStage, parms=parms))
+        
+        # plot juveniles, adults, and resources
+        # x-axis label is initial A value
+        # y-axis label is initial J value
+        matplot(BS.out[,2:4],type="l",lty=1,pch=0.5,col=1:3,
+                xlab=paste0("A = ", A), ylab=paste0("J = ", J))
+        legend('right', names(y), lty=1,col=1:3, bty = "n")
+    }
+}
 
 #### RUNTIME ###################################################################
 
