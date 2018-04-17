@@ -72,6 +72,8 @@ BaseStage<-function(t,y,p){
 J<-1
 A<-5
 R<-10
+y <- c(J,A,R)
+names(y) <- c("Juveniles", "Adults", "Resources")
 
 # duration of simulation
 end.time<-1000
@@ -80,7 +82,7 @@ end.time<-1000
 days<-(seq(0,end.time,by=0.1))
 
 # run desolve to simulate the model through time (days)
-BS.out<-data.frame(ode(y=c(J,A,R),time=days,func=BaseStage, parms=parms))
+BS.out<-data.frame(ode(y=y,time=days,func=BaseStage, parms=parms))
 
 matplot(BS.out[,2:4],type="l",lty=1,pch=0.5,col=1:3)
-legend('right', c("Resource","Adults","Juveniles"), lty=1,col=3:1, bty = "n")
+legend('right', names(y), lty=1,col=1:3, bty = "n")
