@@ -3,43 +3,47 @@ library(deSolve)
 
 #### PARAMETERS ################################################################
 
-#adult to juvenile size ratio
+# z: adult to juvenile size ratio
 z<-0.02
-#adult modifier on production of juveniles - can use to modify stage structure,
-#   seems like it needs to be less than 1
+# p: adult modifier on production of juveniles
+# can use to modify stage structure, seems like it needs to be <1
 p<-0.06
-#conversion efficiency of resource to useful energy for fish
+# sig: conversion efficiency of resource to useful energy for fish
 sig<-0.75
-#maximum ingestion rate ~ make mass specific?
+# M: maximum ingestion rate
+# make mass specific?
 M<-0.5
-#handling time - speed at which fish can eat resources, smaller is faster
+# H: andling time - speed at which fish can eat resources, smaller is faster
 H<-3
-#mortality for juveniles
+# uJ: juvenile mortality
 uJ<-0.005
-#mortality for adults
+# uA: adult mortality
 uA<-0.005
-#mortality for resources (will be useful when we add temp dependence)
+# uR: resource mortality
+# will be useful when we add temp dependence
 uR<-0.005
-#costs of maintaining somatic growth/turnover i.e. the base level of resource 
-#   intake you have to exceed to mature or reproduce
+# t: costs of maintaining somatic growth/turnover
+# i.e. base level of resource intake you must exceed to mature/reproduce
 t<-0.01
-#resource growth rate
+# r: resource growth rate
 r<-5
-#resource carrying capacity
+# K: resource carrying capacity
 K<-50
-#adult reproductive rate
+# B: adult reproductive rate
 B<-0.5
 
-#have to tell desolve which parameters to care about
+# have to tell desolve which parameters to care about
 parms<-c(M=M, H=H, sig=sig, t=t, uJ=uJ, B=B, uA=uA, p=p ,r=r, K=K, uR=uR)
 
 #### ODE FUNCTIONS #############################################################
 
-#ra is reproduction per adult
-#mj is the juvenile maturation rate
-#u with a stage following it is the mortality rate for that stage
-#ca and cj are the functional responses for adults and juveniles respectively
-#   (though they are identical right now)
+# ca: functional response for adults
+# cj: functional response for juveniles
+# mj: juvenile maturation rate
+# ra: reproduction per adult
+# uA: mortality rate for adults
+# uJ: mortality rate for uveniles
+
 BaseStage<-function(t,y,p){
 	{
 		J<-y[1]
@@ -64,18 +68,18 @@ BaseStage<-function(t,y,p){
 
 #### SIMULATION ################################################################
 
-#state variable initial conditions
+# state variable initial conditions
 J<-1
 A<-5
 R<-10
 
-#duration of simulation
+# duration of simulation
 end.time<-1000
 
-#define how time works for simulation
+# define how time works for simulation
 days<-(seq(0,end.time,by=0.1))
 
-#run desolve to simulate the model through time (days)
+# run desolve to simulate the model through time (days)
 BS.out<-data.frame(ode(y=c(J,A,R),time=days,func=BaseStage, parms=parms))
 
 matplot(BS.out[,2:4],type="l",lty=1,pch=0.5,col=1:3)
