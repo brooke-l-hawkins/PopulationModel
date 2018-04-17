@@ -108,3 +108,6 @@ for (j in 1:10) {
 end <- proc.time()
 # print elapsed time
 print(end[3]-start[3])
+
+# adding comment to test commit
+
