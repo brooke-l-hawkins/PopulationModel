@@ -1,6 +1,11 @@
 
 library(deSolve)
 
+#### RUNTIME ###################################################################
+
+# start timing script
+start <- proc.time()
+
 #### PARAMETERS ################################################################
 
 # z: adult to juvenile size ratio
@@ -86,3 +91,10 @@ BS.out<-data.frame(ode(y=y,time=days,func=BaseStage, parms=parms))
 
 matplot(BS.out[,2:4],type="l",lty=1,pch=0.5,col=1:3)
 legend('right', names(y), lty=1,col=1:3, bty = "n")
+
+#### RUNTIME ###################################################################
+
+# stop timing script
+end <- proc.time()
+# print elapsed time
+print(end[3]-start[3])
