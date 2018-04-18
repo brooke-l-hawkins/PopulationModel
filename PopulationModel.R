@@ -62,11 +62,11 @@ BaseStage<-function(t,y,p){
 		ifelse(((sig*cj)-t)<0, mj<-0, mj<-(((sig*cj)-t)-uJ)/(1-z^(1-(uJ/((sig*cj)-t)))))
 		ifelse(((sig*ca)-t)<0, ra<-0, ra<-((sig*ca)-t)*B)
 		
-		dJ.dt<- ra*A -mj*J - uJ
+		dJ.dt<- ra*A -mj*J - uJ*J
 		
-		dA.dt<- mj*J - uA -ra*p*A
+		dA.dt<- mj*J - uA*A - ra*p*A
 		
-		dR.dt<- r*R*(1-(R/K)) - cj*J - ca*A -uR
+		dR.dt<- r*R*(1-(R/K)) - cj*J - ca*A - uR*R
 		
         return(list(c(dJ.dt,dA.dt,dR.dt)))
 	})
