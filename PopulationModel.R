@@ -18,7 +18,8 @@ sig<-0.75
 # M: maximum ingestion rate
 # make mass specific?
 M<-0.5
-# H: andling time - speed at which fish can eat resources, smaller is faster
+# H: handling time
+# speed at which fish can eat resources, smaller is faster
 H<-3
 # uJ: juvenile mortality
 uJ<-0.005
