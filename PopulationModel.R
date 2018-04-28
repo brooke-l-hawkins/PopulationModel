@@ -286,8 +286,6 @@ for (a in adult.vec) {
     } # end juv.vec loop
 } # end adult.vec loop
 
-
-
 #### RUNTIME ###################################################################
 
 # stop timing script
@@ -295,6 +293,3 @@ end <- proc.time()
 # print elapsed time
 print(end[3]-start[3])
 
-curve(0.834*exp(-0.0003/(kb*x)),from=10,to=30)
-exp(-0.5/kb*20)
-*M*(x/(H+x)))-t)*B
