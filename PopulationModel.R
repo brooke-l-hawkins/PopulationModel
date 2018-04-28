@@ -213,6 +213,81 @@ for (i in 1:length(parm.seq)) {
 }
 
 
+#=== changing initial state variables and parameters ===========================
+
+# define how time works for simulation
+days<-(seq(0,300,by=0.1))
+
+# initial conditions for state variables
+# intialize as single value to run one interation,
+# intialize as vector of values to run multiple interations
+adult.vec <- seq(1,10,length = 2)
+juv.vec <- seq(1,10,length = 2)
+res.vec <- seq(1,10,length = 2)
+
+# choose parameter to perturb
+parm.name <- "C"
+# choose range of parameters
+parm.seq <- seq(10,30,length = 2)
+
+# choose variable to show in bifurcation plot
+plot.variable <- "Adults"
+
+# loop to change initial value of adults
+for (a in adult.vec) {
+    # loop to change initial value of juveniles
+    for (j in juv.vec) {
+        # loop to change initial value of resource
+        for (r in res.vec) {
+            y <- c(j,a,r)
+            names(y) <- c("Juveniles", "Adults", "Resources")
+            
+            # initialize list to store output
+            BSt.out.list <- list()
+            # for each parameter value in parm.seq,
+            # create matrix that has n rows and length(y) columns in the BST.out.list
+            for (i in 1:length(parm.seq)) {
+                BSt.out.list[[i]] <- matrix(0, length(days), length(y))
+            }
+            
+            parms<-c(z=z, p=p, sig=sig, M=M, MS=MS, H=H, HS=HS, uJ=uJ, uJe=uJe,
+                     uA=uA, uAe=uAe, uR=uR, uRe=uRe, t=t, te=te, r=r, rS=rS,
+                     K=K, B=B, kb=kb, C=C)
+            
+            # loop to change parameter
+            for (i in 1:length(parm.seq)) {
+                # set parameters
+                parms.loop <- parms
+                parms.loop[parm.index] <- parm.seq[i]
+                # converge
+                BSt.out <- ode(y=y, time=days, BaseStaget, parms=parms.loop)
+                # get converged points
+                BSt.out.list[[i]] <- ode(y=BSt.out[length(days),-1], time=days,
+                                         BaseStaget, parms=parms.loop)[,-1]
+                
+                # plot juveniles, adults, and resources
+                BSt.out.df <- data.frame(BSt.out)
+                matplot(BSt.out.df[,2:4],type="l",lty=1,pch=0.5,col=1:3,
+                        xlab=paste0("J=",j," ","A=",a," ","R=",r," ", parm.name,"=", parm.seq[i]))
+                legend('right', names(y), lty=1,col=1:3, bty = "n")
+            } # end parm.seq loop
+            
+            # bifrucation plot
+            range.lim <- lapply(BSt.out.list, function(x) apply(x, 2, range))
+            range.lim <- apply(do.call("rbind", range.lim), 2, range)
+            plot(0, 0, pch = "", xlab=paste0("J=",j," ","A=",a," ","R=",r," "),
+                 ylab = plot.variable, xlim = range(parm.seq),
+                 ylim = range.lim[,plot.variable])
+            for (i in 1:length(parm.seq)) {
+                points(rep(parm.seq[i], length(days)), BSt.out.list[[i]][,plot.variable])
+            }
+            
+        } # end res.vec loop
+    } # end juv.vec loop
+} # end adult.vec loop
+
+
+
 #### RUNTIME ###################################################################
 
 # stop timing script
