@@ -146,15 +146,6 @@ end <- proc.time()
 # print elapsed time
 print(end[3]-start[3])
 
-
-LotVmod <- function (Time, State, Pars) {
-    with(as.list(c(State, Pars)), {
-        dx = x*(alpha - beta*y)
-        dy = -y*(gamma - delta*x)
-        return(list(c(dx, dy)))
-    })
-}
-
 n <- 100 # number of simulations
 param.name <- "C" # choose parameter to perturb
 param.seq <- seq(10,30,length = 41) # choose range of parameters
