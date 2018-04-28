@@ -119,6 +119,8 @@ BaseStaget<-function(t,y,p){
 
 #### SIMULATION ################################################################
 
+#=== changing initial state variables ==========================================
+
 # define how time works for simulation
 days<-(seq(0,300,by=0.1))
 
@@ -158,10 +160,11 @@ for (a in adult.vec) {
 } # end adult.vec loop
 
 
+#=== changing parameters =======================================================
+
 # define how time works for simulation
 n <- 100 # number of simulations
 days <- (seq(0,end.time,by=0.1))
-
 
 # choose parameter to perturb
 parm.name <- "C"
