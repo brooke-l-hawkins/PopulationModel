@@ -119,38 +119,43 @@ BaseStaget<-function(t,y,p){
 
 #### SIMULATION ################################################################
 
-# duration of simulation
-end.time<-300
-
 # define how time works for simulation
-days<-(seq(0,end.time,by=0.1))
+days<-(seq(0,300,by=0.1))
 
-# create loop to change initial value of J
-for (a in 1:10) {
-    # create loop to change initial value of A
-    for (j in 1:21) {
-        # state variable initial conditions
-        J<-1
-        A<-a/5
-        R<-2
-        y <- c(J,A,R)
-        names(y) <- c("Juveniles", "Adults", "Resources")
-        
-        parms<-c(z=z, p=p, sig=sig, M=M, MS=MS, H=H,HS=HS, uJ=uJ, uJe=uJe,
-                 uA=uA, uAe=uAe, uR=uR, uRe=uRe, t=t, te=te,r=r, rS=rS, K=K, B=B, kb=kb, C=j+9)
-        
-        
-        # run desolve to simulate the model through time (days)
-        BSt.out<-data.frame(ode(y=y,time=days,func=BaseStaget, parms=parms))
-        
-        # plot juveniles, adults, and resources
-        # x-axis label is initial A value
-        # y-axis label is initial J value
-        matplot(BSt.out[,2:4],type="l",lty=1,pch=0.5,col=1:3,
-                xlab=paste0("A = ", A), ylab=paste0("C = ", j+9))
-        legend('right', names(y), lty=1,col=1:3, bty = "n")
-    }
-}
+# initial conditions for state variables
+# intialize as single value to run one interation,
+# intialize as vector of values to run multiple interations
+adult.vec <- seq(1,10,length = 10)
+juv.vec <- seq(1,10,length = 10)
+res.vec <- seq(1,10,length = 10)
+
+# loop to change initial value of adults
+for (a in adult.vec) {
+    # loop to change initial value of juveniles
+    for (j in juv.vec) {
+        # loop to change initial value of resource
+        for (r in res.vec) {
+            J<-j
+            A<-a
+            R<-r
+            y <- c(J,A,R)
+            names(y) <- c("Juveniles", "Adults", "Resources")
+            
+            parms<-c(z=z, p=p, sig=sig, M=M, MS=MS, H=H, HS=HS, uJ=uJ, uJe=uJe,
+                     uA=uA, uAe=uAe, uR=uR, uRe=uRe, t=t, te=te, r=r, rS=rS,
+                     K=K, B=B, kb=kb, C=C)
+            
+            # run desolve to simulate the model through time (days)
+            BSt.out<-data.frame(ode(y=y,time=days,func=BaseStaget, parms=parms))
+            
+            # plot juveniles, adults, and resources
+            matplot(BSt.out[,2:4],type="l",lty=1,pch=0.5,col=1:3,
+                    xlab=paste0("J=",j," ","A=",a," ","R=",r))
+            legend('right', names(y), lty=1,col=1:3, bty = "n")
+            
+        } # end res.vec loop
+    } # end juv.vec loop
+} # end adult.vec loop
 
 
 
