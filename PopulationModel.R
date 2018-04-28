@@ -1,3 +1,4 @@
+
 library(deSolve)
 
 #### RUNTIME ###################################################################
@@ -7,8 +8,8 @@ start <- proc.time()
 
 #### PARAMETERS ################################################################
 
-#Model with just temperature (no mass) - base terms, 
-#(if temp alters them) are now the scaling factor
+# t subscript in variable name indicates temperature-sensitive
+# base terms are now the scaling factor for temperature-sensitive terms
 
 # z: adult to juvenile size ratio
 z<-0.2
@@ -20,37 +21,40 @@ sig<-0.7
 # M: maximum ingestion rate
 # make mass specific?
 M<-0.5
-#MS: function breadth for max intake rate (i.e. attack rate) - open downward
+# MS: function breadth for max intake rate
+# i.e. attack rate, opens downward
 MS<-10
-# H: handling time - speed at which fish can eat resources, smaller is faster
+# H: handling time
+# speed at which fish can eat resources (smaller is faster)
 H<-1
-#HS: function breadth for handling time temp parabola - open upward
+# HS: function breadth for handling time
+# temperature parabola opens upward
 HS<-10
 # uJ: juvenile mortality
-#0.05 at 20
+# uJ = 0.05 when C = 20
 uJ<-1.625
-#uJe: activation energy of juvenile mortality
+# uJe: activation energy of juvenile mortality
 uJe<--0.006
 # uA: adult mortality
-#0.05 at 20
+# uA = 0.005 when C = 20
 uA<-1.625
-#uAe: activation energy og adult mortality
+# uAe: activation energy og adult mortality
 uAe<--0.006
 # uR: resource mortality
-# will be useful when we add temp dependence
-#0.005 at 20
+# uR = 0.005 when C = 20
 uR<-0.163
-#uRe: activation energy of resource mortality
+# uRe: activation energy of resource mortality
 uRe<--0.006
 # t: costs of maintaining somatic growth/turnover
 # i.e. base level of resource intake you must exceed to mature/reproduce
-#0.1 at 20
+# t = 0.1 when C = 20
 t<-0.326
-#te: activation energy of metabolic waste
+# te: activation energy of metabolic waste
 te<--0.006
 # r: resource growth rate
 r<-1.5
-#rS: function breadth for resource growth rate - open downwards
+# rS: function breadth for resource growth rate
+# temperature parabola opens downward
 rS<-15
 # K: resource carrying capacity
 K<-5
@@ -58,7 +62,8 @@ K<-5
 B<-0.5
 # boltzmann's constant
 kb<-8.617*10^-5
-#temp, celsius, 20 is optimal, 10 is cold, 30 is hot
+# t: temperature in degrees celsius
+# 20 is optimal, 10 is cold, 30 is hot
 C<-20
 
 # have to tell desolve which parameters to care about
@@ -67,12 +72,19 @@ parms<-c(z=z, p=p, sig=sig, M=M, MS=MS, H=H,HS=HS, uJ=uJ, uJe=uJe,
 
 #### ODE FUNCTIONS #############################################################
 
+# t subscript in variable name indicates temperature-sensitive
+
+# Mt: maximum ingestion rate
+# Ht: handling time
+# tt: costs of maintaining somatic growth/turnover
+# uJt: mortality rate for juveniles
+# uAt: mortality rate for adults
+# uRt: mortality rate for resources
+# rt: resource growth rate
 # ca: functional response for adults
 # cj: functional response for juveniles
 # mj: juvenile maturation rate
 # ra: reproduction per adult
-# uA: mortality rate for adults
-# uJ: mortality rate for uveniles
 
 BaseStaget<-function(t,y,p){
     {
@@ -98,6 +110,7 @@ BaseStaget<-function(t,y,p){
         
         dA.dt<- mj*J - uAt*A -ra*p*A
         
+        # @Ben - what does 0.005 in "-0.005*R" term represent?
         dR.dt<- rt*R*(1-(R/K)) - cj*J - ca*A -0.005*R
         
         return(list(c(dJ.dt,dA.dt,dR.dt)))
