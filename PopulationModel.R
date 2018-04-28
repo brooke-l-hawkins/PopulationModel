@@ -272,7 +272,7 @@ for (a in adult.vec) {
                 legend('right', names(y), lty=1,col=1:3, bty = "n")
             } # end parm.seq loop
             
-            # bifrucation plot
+            # bifurcation plot
             range.lim <- lapply(BSt.out.list, function(x) apply(x, 2, range))
             range.lim <- apply(do.call("rbind", range.lim), 2, range)
             plot(0, 0, pch = "", xlab=paste0("J=",j," ","A=",a," ","R=",r," "),
