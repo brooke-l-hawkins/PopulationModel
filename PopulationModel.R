@@ -1,4 +1,3 @@
-
 library(deSolve)
 
 #### RUNTIME ###################################################################
@@ -8,38 +7,63 @@ start <- proc.time()
 
 #### PARAMETERS ################################################################
 
+#Model with just temperature (no mass) - base terms, 
+#(if temp alters them) are now the scaling factor
+
 # z: adult to juvenile size ratio
-z<-0.02
+z<-0.2
 # p: adult modifier on production of juveniles
 # can use to modify stage structure, seems like it needs to be <1
-p<-0.06
+p<-0.4
 # sig: conversion efficiency of resource to useful energy for fish
-sig<-0.75
+sig<-0.7
 # M: maximum ingestion rate
 # make mass specific?
 M<-0.5
-# H: handling time
-# speed at which fish can eat resources, smaller is faster
-H<-3
+#MS: function breadth for max intake rate (i.e. attack rate) - open downward
+MS<-10
+# H: handling time - speed at which fish can eat resources, smaller is faster
+H<-1
+#HS: function breadth for handling time temp parabola - open upward
+HS<-10
 # uJ: juvenile mortality
-uJ<-0.005
+#0.05 at 20
+uJ<-1.625
+#uJe: activation energy of juvenile mortality
+uJe<--0.006
 # uA: adult mortality
-uA<-0.005
+#0.05 at 20
+uA<-1.625
+#uAe: activation energy og adult mortality
+uAe<--0.006
 # uR: resource mortality
 # will be useful when we add temp dependence
-uR<-0.005
+#0.005 at 20
+uR<-0.163
+#uRe: activation energy of resource mortality
+uRe<--0.006
 # t: costs of maintaining somatic growth/turnover
 # i.e. base level of resource intake you must exceed to mature/reproduce
-t<-0.01
+#0.1 at 20
+t<-0.326
+#te: activation energy of metabolic waste
+te<--0.006
 # r: resource growth rate
-r<-5
+r<-1.5
+#rS: function breadth for resource growth rate - open downwards
+rS<-15
 # K: resource carrying capacity
-K<-50
+K<-5
 # B: adult reproductive rate
 B<-0.5
+# boltzmann's constant
+kb<-8.617*10^-5
+#temp, celsius, 20 is optimal, 10 is cold, 30 is hot
+C<-20
 
 # have to tell desolve which parameters to care about
-parms<-c(z=z, p=p, sig=sig, M=M, H=H, uJ=uJ, uA=uA, uR=uR, t=t, r=r, K=K, B=B)
+parms<-c(z=z, p=p, sig=sig, M=M, MS=MS, H=H,HS=HS, uJ=uJ, uJe=uJe,
+         uA=uA, uAe=uAe, uR=uR, uRe=uRe, t=t, te=te,r=r, rS=rS, K=K, B=B, kb=kb, C=C)
 
 #### ODE FUNCTIONS #############################################################
 
@@ -50,55 +74,67 @@ parms<-c(z=z, p=p, sig=sig, M=M, H=H, uJ=uJ, uA=uA, uR=uR, t=t, r=r, K=K, B=B)
 # uA: mortality rate for adults
 # uJ: mortality rate for uveniles
 
-BaseStage<-function(t,y,p){
-	{
-		J<-y[1]
-		A<-y[2]
-		R<-y[3]
-	}
-	with(as.list(p),{
-		ca<-M*(R/(H+R))
-		cj<-M*(R/(H+R))
-		ifelse(((sig*cj)-t)<0, mj<-0, mj<-(((sig*cj)-t)-uJ)/(1-z^(1-(uJ/((sig*cj)-t)))))
-		ifelse(((sig*ca)-t)<0, ra<-0, ra<-((sig*ca)-t)*B)
-		
-		dJ.dt<- ra*A -mj*J - uJ*J
-		
-		dA.dt<- mj*J - uA*A - ra*p*A
-		
-		dR.dt<- r*R*(1-(R/K)) - cj*J - ca*A - uR*R
-		
+BaseStaget<-function(t,y,p){
+    {
+        J<-y[1]
+        A<-y[2]
+        R<-y[3]
+    }
+    with(as.list(p),{
+        Mt<-M*exp(-(C-20)^2/(2*MS)^2)
+        Ht<-H*exp((C-20)^2/(2*HS)^2)
+        tt<-t*exp(te/(kb*C))
+        uJt<-uJ*exp(uJe/(kb*C))
+        uAt<-uA*exp(uAe/(kb*C))
+        uRt<-uR*exp(uRe/(kb*C))
+        rt<-r*exp(-(C-23)^2/(2*rS)^2)
+        
+        ca<-Mt*(R/(Ht+R))
+        cj<-Mt*(R/(Ht+R))
+        ifelse(((sig*cj)-tt)<0, mj<-0, mj<-(((sig*cj)-tt)-uJt)/(1-z^(1-(uJt/((sig*cj)-tt)))))
+        ifelse(((sig*ca)-tt)<0, ra<-0, ra<-((sig*ca)-tt)*B)
+        
+        dJ.dt<- ra*A -mj*J - uJt *J
+        
+        dA.dt<- mj*J - uAt*A -ra*p*A
+        
+        dR.dt<- rt*R*(1-(R/K)) - cj*J - ca*A -0.005*R
+        
         return(list(c(dJ.dt,dA.dt,dR.dt)))
-	})
+    })
 }
 
 #### SIMULATION ################################################################
 
 # duration of simulation
-end.time<-1000
+end.time<-300
 
 # define how time works for simulation
 days<-(seq(0,end.time,by=0.1))
 
 # create loop to change initial value of J
-for (j in 1:10) {
+for (a in 1:10) {
     # create loop to change initial value of A
-    for (a in 1:10) {
+    for (j in 1:21) {
         # state variable initial conditions
-        J<-j
-        A<-a
-        R<-10
+        J<-1
+        A<-a/5
+        R<-2
         y <- c(J,A,R)
         names(y) <- c("Juveniles", "Adults", "Resources")
         
+        parms<-c(z=z, p=p, sig=sig, M=M, MS=MS, H=H,HS=HS, uJ=uJ, uJe=uJe,
+                 uA=uA, uAe=uAe, uR=uR, uRe=uRe, t=t, te=te,r=r, rS=rS, K=K, B=B, kb=kb, C=j+9)
+        
+        
         # run desolve to simulate the model through time (days)
-        BS.out<-data.frame(ode(y=y,time=days,func=BaseStage, parms=parms))
+        BSt.out<-data.frame(ode(y=y,time=days,func=BaseStaget, parms=parms))
         
         # plot juveniles, adults, and resources
         # x-axis label is initial A value
         # y-axis label is initial J value
-        matplot(BS.out[,2:4],type="l",lty=1,pch=0.5,col=1:3,
-                xlab=paste0("A = ", A), ylab=paste0("J = ", J))
+        matplot(BSt.out[,2:4],type="l",lty=1,pch=0.5,col=1:3,
+                xlab=paste0("A = ", A), ylab=paste0("C = ", j+9))
         legend('right', names(y), lty=1,col=1:3, bty = "n")
     }
 }
@@ -110,3 +146,51 @@ end <- proc.time()
 # print elapsed time
 print(end[3]-start[3])
 
+
+LotVmod <- function (Time, State, Pars) {
+    with(as.list(c(State, Pars)), {
+        dx = x*(alpha - beta*y)
+        dy = -y*(gamma - delta*x)
+        return(list(c(dx, dy)))
+    })
+}
+
+n <- 100 # number of simulations
+param.name <- "C" # choose parameter to perturb
+param.seq <- seq(10,30,length = 41) # choose range of parameters
+
+Pars<-c(z=z, p=p, sig=sig, M=M, MS=MS, H=H,HS=HS, uJ=uJ, uJe=uJe,
+        uA=uA, uAe=uAe, uR=uR, uRe=uRe, t=t, te=te,r=r, rS=rS, K=K, B=B, kb=kb, C=C)
+Time <- seq(0, 10, length = n)
+State <- c(J = 1, A = 1, R = 2)
+
+param.index <- which(param.name == names(Pars))
+out <- list()
+for (i in 1:length(param.seq))
+    out[[i]] <- matrix(0, n, length(State))
+
+for (i in 1:length(param.seq)) {
+    # set params
+    Pars.loop <- Pars
+    Pars.loop[param.index] <- param.seq[i]
+    # converge
+    init <- ode(State, Time, BaseStaget, Pars.loop)
+    # get converged points
+    out[[i]] <- ode(init[n,-1], Time, BaseStaget, Pars.loop)[,-1]
+}
+
+range.lim <- lapply(out, function(x) apply(x, 2, range))
+range.lim <- apply(do.call("rbind", range.lim), 2, range)
+plot.variable <- "A" # choose which variable to show
+plot(0, 0, pch = "", xlab = param.name, ylab = plot.variable,
+     xlim = range(param.seq), ylim = range.lim[,plot.variable])
+for (i in 1:length(param.seq)) {
+    points(rep(param.seq[i], n), out[[i]][,plot.variable])
+}
+
+
+
+
+curve(0.834*exp(-0.0003/(kb*x)),from=10,to=30)
+exp(-0.5/kb*20)
+*M*(x/(H+x)))-t)*B
