@@ -146,10 +146,10 @@ for (a in adult.vec) {
                      K=K, B=B, kb=kb, C=C)
             
             # run desolve to simulate the model through time (days)
-            BSt.out<-data.frame(ode(y=y,time=days,func=BaseStaget, parms=parms))
+            BSt.out.df <- data.frame(ode(y=y,time=days,func=BaseStaget, parms=parms))
             
             # plot juveniles, adults, and resources
-            matplot(BSt.out[,2:4],type="l",lty=1,pch=0.5,col=1:3,
+            matplot(BSt.out.df[,2:4],type="l",lty=1,pch=0.5,col=1:3,
                     xlab=paste0("J=",j," ","A=",a," ","R=",r))
             legend('right', names(y), lty=1,col=1:3, bty = "n")
             
@@ -158,38 +158,48 @@ for (a in adult.vec) {
 } # end adult.vec loop
 
 
-
+# define how time works for simulation
 n <- 100 # number of simulations
-param.name <- "C" # choose parameter to perturb
-param.seq <- seq(10,30,length = 41) # choose range of parameters
+days <- (seq(0,end.time,by=0.1))
 
-Pars<-c(z=z, p=p, sig=sig, M=M, MS=MS, H=H,HS=HS, uJ=uJ, uJe=uJe,
-        uA=uA, uAe=uAe, uR=uR, uRe=uRe, t=t, te=te,r=r, rS=rS, K=K, B=B, kb=kb, C=C)
-Time <- seq(0, 10, length = n)
-State <- c(J = 1, A = 1, R = 2)
 
-param.index <- which(param.name == names(Pars))
-out <- list()
-for (i in 1:length(param.seq))
-    out[[i]] <- matrix(0, n, length(State))
+# choose parameter to perturb
+parm.name <- "C"
+# choose range of parameters
+parm.seq <- seq(10,30,length = 1)
+# create vector of parameters
+parms<-c(z=z, p=p, sig=sig, M=M, MS=MS, H=H, HS=HS, uJ=uJ, uJe=uJe, uA=uA, 
+         uAe=uAe, uR=uR, uRe=uRe, t=t, te=te, r=r, rS=rS, K=K, B=B, kb=kb, C=C)
+parm.index <- which(parm.name == names(parms))
 
-for (i in 1:length(param.seq)) {
-    # set params
-    Pars.loop <- Pars
-    Pars.loop[param.index] <- param.seq[i]
-    # converge
-    init <- ode(State, Time, BaseStaget, Pars.loop)
-    # get converged points
-    out[[i]] <- ode(init[n,-1], Time, BaseStaget, Pars.loop)[,-1]
+# initial conditions for state variables
+y <- c(J = 1, A = 1, R = 2)
+
+# initialize list to store output
+BSt.out.list <- list()
+# for each parameter value in parm.seq,
+# create matrix that has n rows and length(y) columns in the BST.out.list
+for (i in 1:length(parm.seq)) {
+    BSt.out.list[[i]] <- matrix(0, length(days), length(y))
 }
 
-range.lim <- lapply(out, function(x) apply(x, 2, range))
+for (i in 1:length(parm.seq)) {
+    # set parameters
+    parms.loop <- parms
+    parms.loop[parm.index] <- parm.seq[i]
+    # converge
+    init <- ode(y=y, time=days, BaseStaget, parms=parms.loop)
+    # get converged points
+    BSt.out.list[[i]] <- ode(y=init[n,-1], time=days, BaseStaget, parms=parms.loop)[,-1]
+}
+
+range.lim <- lapply(BSt.out.list, function(x) apply(x, 2, range))
 range.lim <- apply(do.call("rbind", range.lim), 2, range)
 plot.variable <- "A" # choose which variable to show
-plot(0, 0, pch = "", xlab = param.name, ylab = plot.variable,
-     xlim = range(param.seq), ylim = range.lim[,plot.variable])
-for (i in 1:length(param.seq)) {
-    points(rep(param.seq[i], n), out[[i]][,plot.variable])
+plot(0, 0, pch = "", xlab = parm.name, ylab = plot.variable,
+     xlim = range(parm.seq), ylim = range.lim[,plot.variable])
+for (i in 1:length(parm.seq)) {
+    points(rep(parm.seq[i], n), BSt.out.list[[i]][,plot.variable])
 }
 
 
