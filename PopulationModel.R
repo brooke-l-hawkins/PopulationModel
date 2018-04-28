@@ -163,13 +163,12 @@ for (a in adult.vec) {
 #=== changing parameters =======================================================
 
 # define how time works for simulation
-n <- 100 # number of simulations
 days <- (seq(0,end.time,by=0.1))
 
 # choose parameter to perturb
 parm.name <- "C"
 # choose range of parameters
-parm.seq <- seq(10,30,length = 1)
+parm.seq <- seq(10,30,length = 10)
 # create vector of parameters
 parms<-c(z=z, p=p, sig=sig, M=M, MS=MS, H=H, HS=HS, uJ=uJ, uJe=uJe, uA=uA, 
          uAe=uAe, uR=uR, uRe=uRe, t=t, te=te, r=r, rS=rS, K=K, B=B, kb=kb, C=C)
@@ -190,10 +189,18 @@ for (i in 1:length(parm.seq)) {
     # set parameters
     parms.loop <- parms
     parms.loop[parm.index] <- parm.seq[i]
+    
+    # @Ben I'm confused on exactly what the next few lines do. I think you said
+    # you found the code online, could you send where you found it to me?
+    # I changed time=days instead of time=n in some places, I want to make sure
+    # that's correct. I also want to know what using the [,-1] to access info
+    # in "init" does, as I'm not clear on how deSolve objects work. Any info,
+    # from your experience or what you found, would be great!
+    
     # converge
     init <- ode(y=y, time=days, BaseStaget, parms=parms.loop)
     # get converged points
-    BSt.out.list[[i]] <- ode(y=init[n,-1], time=days, BaseStaget, parms=parms.loop)[,-1]
+    BSt.out.list[[i]] <- ode(y=init[length(days),-1], time=days, BaseStaget, parms=parms.loop)[,-1]
 }
 
 range.lim <- lapply(BSt.out.list, function(x) apply(x, 2, range))
@@ -202,7 +209,7 @@ plot.variable <- "A" # choose which variable to show
 plot(0, 0, pch = "", xlab = parm.name, ylab = plot.variable,
      xlim = range(parm.seq), ylim = range.lim[,plot.variable])
 for (i in 1:length(parm.seq)) {
-    points(rep(parm.seq[i], n), BSt.out.list[[i]][,plot.variable])
+    points(rep(parm.seq[i], length(days)), BSt.out.list[[i]][,plot.variable])
 }
 
 
