@@ -139,12 +139,7 @@ for (a in 1:10) {
     }
 }
 
-#### RUNTIME ###################################################################
 
-# stop timing script
-end <- proc.time()
-# print elapsed time
-print(end[3]-start[3])
 
 n <- 100 # number of simulations
 param.name <- "C" # choose parameter to perturb
@@ -180,7 +175,12 @@ for (i in 1:length(param.seq)) {
 }
 
 
+#### RUNTIME ###################################################################
 
+# stop timing script
+end <- proc.time()
+# print elapsed time
+print(end[3]-start[3])
 
 curve(0.834*exp(-0.0003/(kb*x)),from=10,to=30)
 exp(-0.5/kb*20)
