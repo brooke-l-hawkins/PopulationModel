@@ -134,6 +134,8 @@ parm.seq <- seq(10,30,length = 2)
 # find index of parameter to change
 parm.index <- which(names(parms)==parm.name)
 
+# initialize list to store output
+BSt.out.list <- list()
 
 # choose variable to show in bifurcation plot
 plot.variable <- "Adults"
@@ -147,17 +149,6 @@ for (a in adult.vec) {
             y <- c(j,a,r)
             names(y) <- c("Juveniles", "Adults", "Resources")
             
-            # initialize list to store output
-            BSt.out.list <- list()
-            # for each parameter value in parm.seq,
-            # create matrix that has n rows and length(y) columns in the BST.out.list
-            for (i in 1:length(parm.seq)) {
-                BSt.out.list[[i]] <- matrix(0, length(days), length(y))
-            }
-            
-            parms<-c(z=z, p=p, sig=sig, M=M, MS=MS, H=H, HS=HS, uJ=uJ, uJe=uJe,
-                     uA=uA, uAe=uAe, uR=uR, uRe=uRe, t=t, te=te, r=r, rS=rS,
-                     K=K, B=B, kb=kb, C=C)
             
             # loop to change parameter
             for (i in 1:length(parm.seq)) {
