@@ -66,10 +66,6 @@ kb<-8.617*10^-5
 # 20 is optimal, 10 is cold, 30 is hot
 C<-20
 
-# have to tell desolve which parameters to care about
-parms<-c(z=z, p=p, sig=sig, M=M, MS=MS, H=H,HS=HS, uJ=uJ, uJe=uJe,
-         uA=uA, uAe=uAe, uR=uR, uRe=uRe, t=t, te=te,r=r, rS=rS, K=K, B=B, kb=kb, C=C)
-
 #### ODE FUNCTIONS #############################################################
 
 # t subscript in variable name indicates temperature-sensitive
@@ -128,10 +124,16 @@ adult.vec <- seq(1,10,length = 2)
 juv.vec <- seq(1,10,length = 2)
 res.vec <- seq(1,10,length = 2)
 
-# choose parameter to perturb
+# create parameter vector
+parms<-c(z=z, p=p, sig=sig, M=M, MS=MS, H=H,HS=HS, uJ=uJ, uJe=uJe,
+         uA=uA, uAe=uAe, uR=uR, uRe=uRe, t=t, te=te,r=r, rS=rS, K=K, B=B, kb=kb, C=C)
+# choose parameter to change
 parm.name <- "C"
 # choose range of parameters
 parm.seq <- seq(10,30,length = 2)
+# find index of parameter to change
+parm.index <- which(names(parms)==parm.name)
+
 
 # choose variable to show in bifurcation plot
 plot.variable <- "Adults"
