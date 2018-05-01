@@ -110,8 +110,7 @@ BaseStaget<-function(t,y,p){
         
         dA.dt<- mj*J - uAt*A -ra*p*A
         
-        # @Ben - what does 0.005 in "-0.005*R" term represent?
-        dR.dt<- rt*R*(1-(R/K)) - cj*J - ca*A -0.005*R
+        dR.dt<- rt*R*(1-(R/K)) - cj*J - ca*A - uRt*R
         
         return(list(c(dJ.dt,dA.dt,dR.dt)))
     })
