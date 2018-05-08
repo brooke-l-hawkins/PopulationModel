@@ -151,7 +151,7 @@ parms<-c(z=z, p=p, sig=sig, M=M, MS=MS, H=H,HS=HS, uJ=uJ, uJe=uJe,
 parm.index <- which(names(parms)==parm.name)
 
 # initialize list to store output
-BSt.out.list <- list()
+output <- list()
 
 # loop to change initial value of juveniles
 for (j in juv.vec) {
@@ -164,17 +164,15 @@ for (j in juv.vec) {
         # set parameters
         parms.loop <- parms
         parms.loop[parm.index] <- parm.seq[i]
-        # converge
-        BSt.out <- ode(y=y, time=iterations, BaseStaget, parms=parms.loop)
-        # get converged points
-        BSt.out.list[[i]] <- ode(y=BSt.out[length(iterations),-1], time=iterations,
-                                 BaseStaget, parms=parms.loop)[,-1]
-        
 
+        # run simulation
+        output[[i]] <- ode(y=y, time=iterations, BaseStaget, parms=parms.loop)
+        # remove time column
+        output[[i]] <- output[[i]][,-1]
+        
         # juvenile, adult, and resource dynamics plot
         if (dynamics.plot) {
-            BSt.out.df <- data.frame(BSt.out)
-            matplot(BSt.out.df[,2:4],type="l",lty=1,pch=0.5,col=1:3,
+            matplot(output[[i]],type="l",lty=1,pch=0.5,col=1:3,
                     xlab=paste0("J=",j," ","A=",a," ","R=",r," ", parm.name,"=", parm.seq[i]))
         }
 
@@ -182,13 +180,13 @@ for (j in juv.vec) {
 
     # bifurcation plot    
     if (bifrucation.plot) {
-        range.lim <- lapply(BSt.out.list, function(x) apply(x, 2, range))
+        range.lim <- lapply(output, function(x) apply(x, 2, range))
         range.lim <- apply(do.call("rbind", range.lim), 2, range)
         plot(0, 0, pch = "", xlab=paste0("J=",j," ","A=",a," ","R=",r," "),
              ylab = bifurcation.plot.variable, xlim = range(parm.seq),
              ylim = range.lim[,bifurcation.plot.variable])
         for (i in 1:length(parm.seq)) {
-            points(rep(parm.seq[i], length(iterations)), BSt.out.list[[i]][,bifurcation.plot.variable])
+            points(rep(parm.seq[i], length(iterations)), output[[i]][,bifurcation.plot.variable])
         }
     }
     
