@@ -115,7 +115,7 @@ BaseStaget<-function(t,y,p){
 #### SIMULATION ################################################################
 
 # define how time works for simulation
-days<-(seq(0,300,by=0.1))
+days<-(seq(0,800,by=0.1))
 
 # set initial conditions for state variables
 # intialize as single value to run one interation,
