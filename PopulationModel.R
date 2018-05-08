@@ -130,7 +130,7 @@ parms<-c(z=z, p=p, sig=sig, M=M, MS=MS, H=H,HS=HS, uJ=uJ, uJe=uJe,
 # choose parameter to change
 parm.name <- "C"
 # choose range of parameters
-parm.seq <- seq(10,30,length = 2)
+parm.seq <- seq(10,30,length = 3)
 # find index of parameter to change
 parm.index <- which(names(parms)==parm.name)
 
@@ -139,6 +139,14 @@ BSt.out.list <- list()
 
 # choose variable to show in bifurcation plot
 plot.variable <- "Adults"
+
+# plotting
+# layout for plots
+par(mfcol=c(3,3))
+# plot juvenile, adult, and resource dynamics?
+dynamics.plot = F
+# plot bifurcation plot?
+bifrucation.plot = T
 
 # loop to change initial value of juveniles
 for (j in juv.vec) {
@@ -157,21 +165,27 @@ for (j in juv.vec) {
         BSt.out.list[[i]] <- ode(y=BSt.out[length(days),-1], time=days,
                                  BaseStaget, parms=parms.loop)[,-1]
         
-        # plot juveniles, adults, and resources
-        BSt.out.df <- data.frame(BSt.out)
-        matplot(BSt.out.df[,2:4],type="l",lty=1,pch=0.5,col=1:3,
-                xlab=paste0("J=",j," ","A=",a," ","R=",r," ", parm.name,"=", parm.seq[i]))
-        legend('right', names(y), lty=1,col=1:3, bty = "n")
+
+        # juvenile, adult, and resource dynamics plot
+        if (dynamics.plot) {
+            BSt.out.df <- data.frame(BSt.out)
+            matplot(BSt.out.df[,2:4],type="l",lty=1,pch=0.5,col=1:3,
+                    xlab=paste0("J=",j," ","A=",a," ","R=",r," ", parm.name,"=", parm.seq[i]))
+            legend('right', names(y), lty=1,col=1:3, bty = "n")
+        }
+
     } # end parm.seq loop
-    
-    # bifurcation plot
-    range.lim <- lapply(BSt.out.list, function(x) apply(x, 2, range))
-    range.lim <- apply(do.call("rbind", range.lim), 2, range)
-    plot(0, 0, pch = "", xlab=paste0("J=",j," ","A=",a," ","R=",r," "),
-         ylab = plot.variable, xlim = range(parm.seq),
-         ylim = range.lim[,plot.variable])
-    for (i in 1:length(parm.seq)) {
-        points(rep(parm.seq[i], length(days)), BSt.out.list[[i]][,plot.variable])
+
+    # bifurcation plot    
+    if (bifrucation.plot) {
+        range.lim <- lapply(BSt.out.list, function(x) apply(x, 2, range))
+        range.lim <- apply(do.call("rbind", range.lim), 2, range)
+        plot(0, 0, pch = "", xlab=paste0("J=",j," ","A=",a," ","R=",r," "),
+             ylab = plot.variable, xlim = range(parm.seq),
+             ylim = range.lim[,plot.variable])
+        for (i in 1:length(parm.seq)) {
+            points(rep(parm.seq[i], length(days)), BSt.out.list[[i]][,plot.variable])
+        }
     }
     
 } # end juv.vec loop
