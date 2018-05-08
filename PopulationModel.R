@@ -171,7 +171,6 @@ for (j in juv.vec) {
             BSt.out.df <- data.frame(BSt.out)
             matplot(BSt.out.df[,2:4],type="l",lty=1,pch=0.5,col=1:3,
                     xlab=paste0("J=",j," ","A=",a," ","R=",r," ", parm.name,"=", parm.seq[i]))
-            legend('right', names(y), lty=1,col=1:3, bty = "n")
         }
 
     } # end parm.seq loop
