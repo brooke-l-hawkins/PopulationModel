@@ -114,39 +114,44 @@ BaseStaget<-function(t,y,p){
 
 #### SIMULATION ################################################################
 
-# define how time works for simulation
-days<-(seq(0,800,by=0.1))
+# Set Plot Preferences ---------------------------------------------------------
 
-# set initial conditions for state variables
-# intialize as single value to run one interation,
-# intialize as vector of values to run multiple interations
+# plot juvenile, adult, and resource dynamics?
+dynamics.plot = T
+# plot bifurcation plot?
+bifrucation.plot = T
+# layout for plots
+par(mfcol=c(4,5), mar=c(1,1,1,1))
+
+days <- 1000
+iterations <- seq(0,days,by=0.1)
+if (bifrucation.plot) {
+    bifurcation.plot.variable <- "Adults"
+}
+
+# Set State Variables ----------------------------------------------------------
+
+juv.vec <- c(1,2,3,4,5) # juveniles
 a <- 1 # adults
-juv.vec <- c(0.01,0.1,1,2,3,4,5,10,100) # juveniles
 r <- 1 # resources
 
-# create parameter vector
-parms<-c(z=z, p=p, sig=sig, M=M, MS=MS, H=H,HS=HS, uJ=uJ, uJe=uJe,
-         uA=uA, uAe=uAe, uR=uR, uRe=uRe, t=t, te=te,r=r, rS=rS, K=K, B=B, kb=kb, C=C)
+# Set Parameters ---------------------------------------------------------------
+
 # choose parameter to change
 parm.name <- "C"
 # choose range of parameters
 parm.seq <- seq(10,30,length = 3)
+
+# ------------------------------------------------------------------------------
+
+# create parameter vector
+parms<-c(z=z, p=p, sig=sig, M=M, MS=MS, H=H,HS=HS, uJ=uJ, uJe=uJe,
+         uA=uA, uAe=uAe, uR=uR, uRe=uRe, t=t, te=te,r=r, rS=rS, K=K, B=B, kb=kb, C=C)
 # find index of parameter to change
 parm.index <- which(names(parms)==parm.name)
 
 # initialize list to store output
 BSt.out.list <- list()
-
-# choose variable to show in bifurcation plot
-plot.variable <- "Adults"
-
-# plotting
-# layout for plots
-par(mfcol=c(3,3))
-# plot juvenile, adult, and resource dynamics?
-dynamics.plot = F
-# plot bifurcation plot?
-bifrucation.plot = T
 
 # loop to change initial value of juveniles
 for (j in juv.vec) {
@@ -160,9 +165,9 @@ for (j in juv.vec) {
         parms.loop <- parms
         parms.loop[parm.index] <- parm.seq[i]
         # converge
-        BSt.out <- ode(y=y, time=days, BaseStaget, parms=parms.loop)
+        BSt.out <- ode(y=y, time=iterations, BaseStaget, parms=parms.loop)
         # get converged points
-        BSt.out.list[[i]] <- ode(y=BSt.out[length(days),-1], time=days,
+        BSt.out.list[[i]] <- ode(y=BSt.out[length(iterations),-1], time=iterations,
                                  BaseStaget, parms=parms.loop)[,-1]
         
 
@@ -180,10 +185,10 @@ for (j in juv.vec) {
         range.lim <- lapply(BSt.out.list, function(x) apply(x, 2, range))
         range.lim <- apply(do.call("rbind", range.lim), 2, range)
         plot(0, 0, pch = "", xlab=paste0("J=",j," ","A=",a," ","R=",r," "),
-             ylab = plot.variable, xlim = range(parm.seq),
-             ylim = range.lim[,plot.variable])
+             ylab = bifurcation.plot.variable, xlim = range(parm.seq),
+             ylim = range.lim[,bifurcation.plot.variable])
         for (i in 1:length(parm.seq)) {
-            points(rep(parm.seq[i], length(days)), BSt.out.list[[i]][,plot.variable])
+            points(rep(parm.seq[i], length(iterations)), BSt.out.list[[i]][,bifurcation.plot.variable])
         }
     }
     
