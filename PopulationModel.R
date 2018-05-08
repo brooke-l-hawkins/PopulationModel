@@ -123,8 +123,8 @@ bifrucation.plot = T
 # layout for plots
 par(mfcol=c(4,5), mar=c(1,1,1,1))
 
-days <- 1000
-iterations <- seq(0,days,by=0.1)
+iterations <- 0:10000
+iterations <- iterations/10
 if (bifrucation.plot) {
     bifurcation.plot.variable <- "Adults"
 }
@@ -178,7 +178,7 @@ for (j in juv.vec) {
 
     } # end parm.seq loop
 
-    # bifurcation plot    
+    # bifurcation plot
     if (bifrucation.plot) {
         range.lim <- lapply(output, function(x) apply(x, 2, range))
         range.lim <- apply(do.call("rbind", range.lim), 2, range)
