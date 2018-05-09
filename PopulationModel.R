@@ -126,7 +126,11 @@ par(mfcol=c(4,5), mar=c(1,1,1,1))
 iterations <- 0:10000
 iterations <- iterations/10
 if (bifrucation.plot) {
+    # which state variable should be plotted?
     bifurcation.plot.variable <- "Adults"
+    # which proportion of indices should be plotted?
+    # ex. 0.5 will plot last half of iterations
+    bifurcation.plot.portion <- 0.5
 }
 
 # Set State Variables ----------------------------------------------------------
@@ -180,13 +184,24 @@ for (j in juv.vec) {
 
     # bifurcation plot
     if (bifrucation.plot) {
+        
+        # choose rows to plot
+        total.rows <- length(iterations)
+        bifurcation.first.row <- round(bifurcation.plot.portion * total.rows)
+        bifurcation.last.row <- total.rows
+        bifurcation.rows <- bifurcation.first.row:bifurcation.last.row
+        
+        # set up plot axes and labels
+        # TODO change range.lim to depend on bifurcation.plot.portion
         range.lim <- lapply(output, function(x) apply(x, 2, range))
         range.lim <- apply(do.call("rbind", range.lim), 2, range)
         plot(0, 0, pch = "", xlab=paste0("J=",j," ","A=",a," ","R=",r," "),
              ylab = bifurcation.plot.variable, xlim = range(parm.seq),
              ylim = range.lim[,bifurcation.plot.variable])
+        
+        # plot points
         for (i in 1:length(parm.seq)) {
-            points(rep(parm.seq[i], length(iterations)), output[[i]][,bifurcation.plot.variable])
+            points(rep(parm.seq[i], length(bifurcation.rows)), output[[i]][bifurcation.rows,bifurcation.plot.variable])
         }
     }
     
