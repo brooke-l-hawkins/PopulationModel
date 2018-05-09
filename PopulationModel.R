@@ -114,25 +114,6 @@ BaseStaget<-function(t,y,p){
 
 #### SIMULATION ################################################################
 
-# Set Plot Preferences ---------------------------------------------------------
-
-# plot juvenile, adult, and resource dynamics?
-dynamics.plot = T
-# plot bifurcation plot?
-b.plot = T
-# layout for plots
-par(mfcol=c(4,5), mar=c(1,1,1,1))
-
-iterations <- 0:10000
-iterations <- iterations/10
-if (b.plot) {
-    # which state variable should be plotted in bifurcation plot?
-    b.var <- "Adults"
-    # which proportion of iterations should be plotted in bifurcation plot?
-    # ex. 0.5 will plot last half of iterations
-    b.portion <- 0.5
-}
-
 # Set State Variables ----------------------------------------------------------
 
 juv.vec <- c(1,2,3,4,5) # juveniles
@@ -146,7 +127,37 @@ parm.name <- "C"
 # choose range of parameters
 parm.seq <- seq(10,30,length = 3)
 
-# ------------------------------------------------------------------------------
+# Set Plot Preferences ---------------------------------------------------------
+
+# plot juvenile, adult, and resource dynamics?
+dynamics.plot = T
+# plot bifurcation plot?
+b.plot = F
+
+# layout for plots
+# TODO update margins
+if (dynamics.plot & b.plot) {
+    # first rows have dynamics plots for one value in parm.seq
+    # last row has bifurcation plots
+    # columns have dynamics and bifurcation plots for one value in juv.vec
+    par(mfcol=c(length(parm.seq)+1,length(juv.vec)), mar=c(1.5,1.5,1.5,1.5))
+} else if (dynamics.plot) {
+    # rows have dynamics plots for one value in parm.seq
+    # columns have dynamics plots for one value in juv.vec
+    par(mfcol=c(length(parm.seq),length(juv.vec)), mar=c(1.5,1.5,1.5,1.5))
+}
+
+iterations <- 0:10000
+iterations <- iterations/10
+if (b.plot) {
+    # which state variable should be plotted in bifurcation plot?
+    b.var <- "Adults"
+    # which proportion of iterations should be plotted in bifurcation plot?
+    # ex. 0.25 will plot last quarter of iterations
+    b.portion <- 0.5
+}
+
+# Run Simulation ---------------------------------------------------------------
 
 # create parameter vector
 parms<-c(z=z, p=p, sig=sig, M=M, MS=MS, H=H,HS=HS, uJ=uJ, uJe=uJe,
