@@ -119,18 +119,18 @@ BaseStaget<-function(t,y,p){
 # plot juvenile, adult, and resource dynamics?
 dynamics.plot = T
 # plot bifurcation plot?
-bifrucation.plot = T
+b.plot = T
 # layout for plots
 par(mfcol=c(4,5), mar=c(1,1,1,1))
 
 iterations <- 0:10000
 iterations <- iterations/10
-if (bifrucation.plot) {
-    # which state variable should be plotted?
-    bifurcation.plot.variable <- "Adults"
-    # which proportion of indices should be plotted?
+if (b.plot) {
+    # which state variable should be plotted in bifurcation plot?
+    b.var <- "Adults"
+    # which proportion of iterations should be plotted in bifurcation plot?
     # ex. 0.5 will plot last half of iterations
-    bifurcation.plot.portion <- 0.5
+    b.portion <- 0.5
 }
 
 # Set State Variables ----------------------------------------------------------
@@ -183,25 +183,25 @@ for (j in juv.vec) {
     } # end parm.seq loop
 
     # bifurcation plot
-    if (bifrucation.plot) {
+    if (b.plot) {
         
         # choose rows to plot
         total.rows <- length(iterations)
-        bifurcation.first.row <- round(bifurcation.plot.portion * total.rows)
-        bifurcation.last.row <- total.rows
-        bifurcation.rows <- bifurcation.first.row:bifurcation.last.row
+        b.first.row <- round(b.portion * total.rows)
+        b.last.row <- total.rows
+        b.rows <- b.first.row:b.last.row
         
         # set up plot axes and labels
-        # TODO change range.lim to depend on bifurcation.plot.portion
+        # TODO change range.lim to depend on bifurcation plot portion
         range.lim <- lapply(output, function(x) apply(x, 2, range))
         range.lim <- apply(do.call("rbind", range.lim), 2, range)
         plot(0, 0, pch = "", xlab=paste0("J=",j," ","A=",a," ","R=",r," "),
-             ylab = bifurcation.plot.variable, xlim = range(parm.seq),
-             ylim = range.lim[,bifurcation.plot.variable])
+             ylab = b.var, xlim = range(parm.seq),
+             ylim = range.lim[,b.var])
         
         # plot points
         for (i in 1:length(parm.seq)) {
-            points(rep(parm.seq[i], length(bifurcation.rows)), output[[i]][bifurcation.rows,bifurcation.plot.variable])
+            points(rep(parm.seq[i], length(b.rows)), output[[i]][b.rows,b.var])
         }
     }
     
