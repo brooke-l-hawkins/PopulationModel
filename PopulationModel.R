@@ -132,19 +132,20 @@ parm.seq <- seq(10,30,length = 3)
 # plot juvenile, adult, and resource dynamics?
 dynamics.plot = T
 # plot bifurcation plot?
-b.plot = F
+b.plot = T
 
 # layout for plots
-# TODO update margins
 if (dynamics.plot & b.plot) {
     # first rows have dynamics plots for one value in parm.seq
     # last row has bifurcation plots
     # columns have dynamics and bifurcation plots for one value in juv.vec
-    par(mfcol=c(length(parm.seq)+1,length(juv.vec)), mar=c(1.5,1.5,1.5,1.5))
+    par(mfcol=c(length(parm.seq)+1,length(juv.vec)),
+        mar=c(2,3,2,1), mgp=c(1.5,0.5,0))
 } else if (dynamics.plot) {
     # rows have dynamics plots for one value in parm.seq
     # columns have dynamics plots for one value in juv.vec
-    par(mfcol=c(length(parm.seq),length(juv.vec)), mar=c(1.5,1.5,1.5,1.5))
+    par(mfcol=c(length(parm.seq),length(juv.vec)),
+        mar=c(2,3,2,1), mgp=c(1.5,0.5,0))
 }
 
 iterations <- 0:10000
@@ -187,8 +188,13 @@ for (j in juv.vec) {
         
         # juvenile, adult, and resource dynamics plot
         if (dynamics.plot) {
-            matplot(output[[i]],type="l",lty=1,pch=0.5,col=1:3,
-                    xlab=paste0("J=",j," ","A=",a," ","R=",r," ", parm.name,"=", parm.seq[i]))
+            matplot(output[[i]],type="l",lty=1,pch=0.5,col=1:3, xlab='', ylab='')
+            if (i==1) {
+                title(main=paste0("J=",j), cex.main=1)
+            }
+            if (j == juv.vec[1]) {
+                title(ylab=paste0(parm.name,"=",parm.seq[i]), cex.lab=1, font.lab=2)
+            }
         }
 
     } # end parm.seq loop
@@ -206,9 +212,8 @@ for (j in juv.vec) {
         # TODO change range.lim to depend on bifurcation plot portion
         range.lim <- lapply(output, function(x) apply(x, 2, range))
         range.lim <- apply(do.call("rbind", range.lim), 2, range)
-        plot(0, 0, pch = "", xlab=paste0("J=",j," ","A=",a," ","R=",r," "),
-             ylab = b.var, xlim = range(parm.seq),
-             ylim = range.lim[,b.var])
+        plot(0, 0, pch = "", xlim = range(parm.seq), ylim = range.lim[,b.var],
+             xlab='', ylab='')
         
         # plot points
         for (i in 1:length(parm.seq)) {
