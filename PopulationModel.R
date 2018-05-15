@@ -121,21 +121,26 @@ BaseStaget<-function(t,y,p){
 #### SIMULATION ################################################################
 
 # Set State Variables ----------------------------------------------------------
-juv.vec <- c(0.1,1,5,10) # juveniles
+j <- 1 # juveniles
 a <- 1 # adults
 r <- 1 # resources
 
 # Set Parameters ---------------------------------------------------------------
 
+# enter name of temperature parameter
+temp.name <- "C"
+# choose range of temperatures
+temp.seq <- seq(10,30,length = 21)
+
 # choose parameter to change
-parm.name <- "C"
+parm.name <- "q"
 # choose range of parameters
-parm.seq <- seq(10,30,length = 21)
+parm.seq <- seq(0,2,length = 5)
 
 # Set Plot Preferences ---------------------------------------------------------
 
 # plot juvenile, adult, and resource dynamics?
-# TODO add dynamics.to.plot vector
+# TODO add dynamics.to.plot <- c(10,15,20,25,30)
 dynamics.plot = T
 # plot bifurcation plot?
 b.plot = T
@@ -145,22 +150,20 @@ if (dynamics.plot & b.plot) {
     # first rows have dynamics plots for one value in parm.seq
     # last row has bifurcation plots
     # columns have dynamics and bifurcation plots for one value in juv.vec
-    #par(mfcol=c(length(parm.seq)+1,length(juv.vec)),
-    #    mar=c(2,3,2,1), mgp=c(1.5,0.5,0))
-    
-    #TODO delete
-    par(mfcol=c(6,length(juv.vec)),
+
+    #TODO generalize
+    par(mfcol=c(6,length(parm.seq)),
         mar=c(2,3,2,1), mgp=c(1.5,0.5,0))
     
 } else if (dynamics.plot) {
     # rows have dynamics plots for one value in parm.seq
     # columns have dynamics plots for one value in juv.vec
-    par(mfcol=c(length(parm.seq),length(juv.vec)),
+    par(mfcol=c(length(temp.seq),length(parm.seq)),
         mar=c(2,3,2,1), mgp=c(1.5,0.5,0))
 } else if (b.plot) {
     # one row of bifurcation plots
     # columns correspond to one value in juv.vec
-    par(mfcol=c(1,length(juv.vec)),
+    par(mfcol=c(1,length(parm.seq)),
         mar=c(2,3,2,1), mgp=c(1.5,0.5,0))
 }
 
@@ -179,46 +182,49 @@ if (b.plot) {
 # create parameter vector
 parms<-c(z=z, p=p, q=q, sig=sig, M=M, MS=MS, H=H,HS=HS, uJ=uJ, uJe=uJe, uA=uA, 
          uAe=uAe, uR=uR, uRe=uRe, t=t, te=te,r=r, rS=rS, K=K, B=B, kb=kb, C=C)
+# find index of temperature to change
+temp.index <- which(names(parms)==temp.name)
 # find index of parameter to change
 parm.index <- which(names(parms)==parm.name)
 
 # initialize list to store output
 output <- list()
 
-# loop to change initial value of juveniles
-for (j in juv.vec) {
-    print(paste0("Starting simulation for J=",j))
+# loop to change parameter
+for (i in 1:length(parm.seq)) {
+    print(paste0("Starting simulation for ",parm.name,"=",parm.seq[i]))
     
     y <- c(j,a,r)
     names(y) <- c("Juveniles", "Adults", "Resources")
     
+    # set parameters
+    parms.loop <- parms
+    parms.loop[parm.index] <- parm.seq[i]
     
     # loop to change parameter
-    for (i in 1:length(parm.seq)) {
-        print(paste0("Starting simulation for ",parm.name,"=",parm.seq[i]))
+    for (j in 1:length(temp.seq)) {
+        print(paste0("Starting simulation for ",temp.name,"=",temp.seq[j]))
         
-        # set parameters
-        parms.loop <- parms
-        parms.loop[parm.index] <- parm.seq[i]
+        # set temperature
+        parms.loop[temp.index] <- temp.seq[j]
 
         # run simulation
-        output[[i]] <- ode(y=y, time=iterations, BaseStaget, parms=parms.loop)
+        output[[j]] <- ode(y=y, time=iterations, BaseStaget, parms=parms.loop)
         # remove time column
-        output[[i]] <- output[[i]][,-1]
+        output[[j]] <- output[[j]][,-1]
         
         # juvenile, adult, and resource dynamics plot
-        # TODO remove second condition
-        if (dynamics.plot & sum(parm.seq[i]==c(10,15,20,25,30))==1) {
-            matplot(output[[i]],type="l",lty=1,pch=0.5,col=1:3, xlab='', ylab='')
-            if (i==1) {
-                title(main=paste0("J=",j), cex.main=1)
+        if (dynamics.plot & sum(temp.seq[j]==c(10,15,20,25,30))==1) {
+            matplot(output[[j]],type="l",lty=1,pch=0.5,col=1:3, xlab='', ylab='')
+            if (j==1) {
+                title(main=paste0(parm.name,"=",parm.seq[i]), cex.main=1)
             }
-            if (j == juv.vec[1]) {
-                title(ylab=paste0(parm.name,"=",parm.seq[i]), cex.lab=1, font.lab=2)
+            if (i==1) {
+                title(ylab=paste0(temp.name,"=",temp.seq[j]), cex.lab=1, font.lab=2)
             }
         }
 
-    } # end parm.seq loop
+    } # end temp.seq loop
 
     # bifurcation plot
     if (b.plot) {
@@ -232,20 +238,19 @@ for (j in juv.vec) {
         # set up plot axes and labels
         range.lim <- lapply(output, function(x) apply(x, 2, range))
         range.lim <- apply(do.call("rbind", range.lim), 2, range)
-        plot(0, 0, pch = "", xlim = range(parm.seq), ylim = range.lim[,b.var],
+        plot(0, 0, pch = "", xlim = range(temp.seq), ylim = range.lim[,b.var],
              xlab='', ylab='')
+        
         # add title if dynamics plot hasn't already
-        if (!dynamics.plot) title(main=paste0("J=",j), cex.main=1)
+        if (!dynamics.plot) title(main=paste0(parm.name,"=",parm.seq[j]), cex.main=1)
         
         # plot points
-        for (i in 1:length(parm.seq)) {
-            # TODO remove statement to avoid when J=10, C=21
-            if (j==10 & parm.seq[i]==21) next
-            points(rep(parm.seq[i], length(b.rows)), output[[i]][b.rows,b.var])
+        for (j in 1:length(temp.seq)) {
+            points(rep(temp.seq[j], length(b.rows)), output[[j]][b.rows,b.var])
         }
     }
     
-} # end juv.vec loop
+} # end parm.seq loop
 
 #### RUNTIME ###################################################################
 
