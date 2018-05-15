@@ -94,14 +94,14 @@ BaseStaget<-function(t,y,p){
         R<-y[3]
     }
     with(as.list(p),{
-        # TODO add tOpt values; MtOpt = 20, HtOpt = 20; rtOpt = 23
+        # TODO add tOpt values; MtOpt = 20, HtOpt = 20; rtOpt = 20
         Mt<-M*exp(-(C-20)^2/(2*MS)^2)
         Ht<-H*exp((C-20)^2/(2*HS)^2)
         tt<-t*exp(te/(kb*C))
         uJt<-uJ*exp(uJe/(kb*C))
         uAt<-uA*exp(uAe/(kb*C))
         uRt<-uR*exp(uRe/(kb*C))
-        rt<-r*exp(-(C-23)^2/(2*rS)^2)
+        rt<-r*exp(-(C-20)^2/(2*rS)^2)
         
         ca<-q*Mt*(R/(Ht+R))
         cj<-(2-q)*Mt*(R/(Ht+R))
