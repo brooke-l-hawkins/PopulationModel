@@ -121,9 +121,9 @@ BaseStaget<-function(t,y,p){
 #### SIMULATION ################################################################
 
 # Set State Variables ----------------------------------------------------------
-j <- 1 # juveniles
-a <- 1 # adults
-r <- 1 # resources
+j.initial <- 1 # juveniles
+a.initial <- 1 # adults
+r.initial <- 1 # resources
 
 # Set Parameters ---------------------------------------------------------------
 
@@ -135,7 +135,7 @@ temp.seq <- seq(10,30,length = 21)
 # choose parameter to change
 parm.name <- "q"
 # choose range of parameters
-parm.seq <- seq(0,2,length = 5)
+parm.seq <- seq(0.5,1.5,length = 5)
 
 # Set Plot Preferences ---------------------------------------------------------
 
@@ -194,7 +194,7 @@ output <- list()
 for (i in 1:length(parm.seq)) {
     print(paste0("Starting simulation for ",parm.name,"=",parm.seq[i]))
     
-    y <- c(j,a,r)
+    y <- c(j.initial, a.initial, r.initial)
     names(y) <- c("Juveniles", "Adults", "Resources")
     
     # set parameters
@@ -246,6 +246,8 @@ for (i in 1:length(parm.seq)) {
         
         # plot points
         for (j in 1:length(temp.seq)) {
+            # TODO evaluate weird model behavior so next line is unnecessary
+            if (length(output[[j]][,b.var]) < length(iterations)) next
             points(rep(temp.seq[j], length(b.rows)), output[[j]][b.rows,b.var])
         }
     }
