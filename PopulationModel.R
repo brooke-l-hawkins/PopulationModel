@@ -89,6 +89,7 @@ BaseStaget<-function(t,y,p){
         R<-y[3]
     }
     with(as.list(p),{
+        # TODO add tOpt values; MtOpt = 20, HtOpt = 20; rtOpt = 23
         Mt<-M*exp(-(C-20)^2/(2*MS)^2)
         Ht<-H*exp((C-20)^2/(2*HS)^2)
         tt<-t*exp(te/(kb*C))
@@ -115,8 +116,7 @@ BaseStaget<-function(t,y,p){
 #### SIMULATION ################################################################
 
 # Set State Variables ----------------------------------------------------------
-
-juv.vec <- c(1,2,3,4,5) # juveniles
+juv.vec <- c(0.1,1,5,10) # juveniles
 a <- 1 # adults
 r <- 1 # resources
 
@@ -125,11 +125,12 @@ r <- 1 # resources
 # choose parameter to change
 parm.name <- "C"
 # choose range of parameters
-parm.seq <- seq(10,30,length = 3)
+parm.seq <- seq(10,30,length = 21)
 
 # Set Plot Preferences ---------------------------------------------------------
 
 # plot juvenile, adult, and resource dynamics?
+# TODO add dynamics.to.plot vector
 dynamics.plot = T
 # plot bifurcation plot?
 b.plot = T
@@ -139,23 +140,33 @@ if (dynamics.plot & b.plot) {
     # first rows have dynamics plots for one value in parm.seq
     # last row has bifurcation plots
     # columns have dynamics and bifurcation plots for one value in juv.vec
-    par(mfcol=c(length(parm.seq)+1,length(juv.vec)),
+    #par(mfcol=c(length(parm.seq)+1,length(juv.vec)),
+    #    mar=c(2,3,2,1), mgp=c(1.5,0.5,0))
+    
+    #TODO delete
+    par(mfcol=c(6,length(juv.vec)),
         mar=c(2,3,2,1), mgp=c(1.5,0.5,0))
+    
 } else if (dynamics.plot) {
     # rows have dynamics plots for one value in parm.seq
     # columns have dynamics plots for one value in juv.vec
     par(mfcol=c(length(parm.seq),length(juv.vec)),
         mar=c(2,3,2,1), mgp=c(1.5,0.5,0))
+} else if (b.plot) {
+    # one row of bifurcation plots
+    # columns correspond to one value in juv.vec
+    par(mfcol=c(1,length(juv.vec)),
+        mar=c(2,3,2,1), mgp=c(1.5,0.5,0))
 }
 
-iterations <- 0:10000
+iterations <- 0:50000
 iterations <- iterations/10
 if (b.plot) {
     # which state variable should be plotted in bifurcation plot?
     b.var <- "Adults"
     # which proportion of iterations should be plotted in bifurcation plot?
     # ex. 0.25 will plot last quarter of iterations
-    b.portion <- 0.5
+    b.portion <- 0.25
 }
 
 # Run Simulation ---------------------------------------------------------------
@@ -171,12 +182,16 @@ output <- list()
 
 # loop to change initial value of juveniles
 for (j in juv.vec) {
+    print(paste0("Starting simulation for J=",j))
+    
     y <- c(j,a,r)
     names(y) <- c("Juveniles", "Adults", "Resources")
     
     
     # loop to change parameter
     for (i in 1:length(parm.seq)) {
+        print(paste0("Starting simulation for ",parm.name,"=",parm.seq[i]))
+        
         # set parameters
         parms.loop <- parms
         parms.loop[parm.index] <- parm.seq[i]
@@ -187,7 +202,8 @@ for (j in juv.vec) {
         output[[i]] <- output[[i]][,-1]
         
         # juvenile, adult, and resource dynamics plot
-        if (dynamics.plot) {
+        # TODO remove second condition
+        if (dynamics.plot & sum(parm.seq[i]==c(10,15,20,25,30))==1) {
             matplot(output[[i]],type="l",lty=1,pch=0.5,col=1:3, xlab='', ylab='')
             if (i==1) {
                 title(main=paste0("J=",j), cex.main=1)
@@ -204,19 +220,22 @@ for (j in juv.vec) {
         
         # choose rows to plot
         total.rows <- length(iterations)
-        b.first.row <- round(b.portion * total.rows)
+        b.first.row <- round((1-b.portion) * total.rows)
         b.last.row <- total.rows
         b.rows <- b.first.row:b.last.row
         
         # set up plot axes and labels
-        # TODO change range.lim to depend on bifurcation plot portion
         range.lim <- lapply(output, function(x) apply(x, 2, range))
         range.lim <- apply(do.call("rbind", range.lim), 2, range)
         plot(0, 0, pch = "", xlim = range(parm.seq), ylim = range.lim[,b.var],
              xlab='', ylab='')
+        # add title if dynamics plot hasn't already
+        if (!dynamics.plot) title(main=paste0("J=",j), cex.main=1)
         
         # plot points
         for (i in 1:length(parm.seq)) {
+            # TODO remove statement to avoid when J=10, C=21
+            if (j==10 & parm.seq[i]==21) next
             points(rep(parm.seq[i], length(b.rows)), output[[i]][b.rows,b.var])
         }
     }
