@@ -246,8 +246,6 @@ for (i in 1:length(parm.seq)) {
         
         # plot points
         for (j in 1:length(temp.seq)) {
-            # TODO evaluate weird model behavior so next line is unnecessary
-            if (length(output[[j]][,b.var]) < length(iterations)) next
             points(rep(temp.seq[j], length(b.rows)), output[[j]][b.rows,b.var])
         }
     }
