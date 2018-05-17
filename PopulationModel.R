@@ -105,8 +105,9 @@ BaseStaget<-function(t,y,p){
         
         ca<-q*Mt*(R/(Ht+R))
         cj<-(2-q)*Mt*(R/(Ht+R))
-        ifelse(((sig*cj)-tt)<0, mj<-0, mj<-(((sig*cj)-tt)-uJt)/(1-z^(1-(uJt/((sig*cj)-tt)))))
-        ifelse(((sig*ca)-tt)<0, ra<-0, ra<-((sig*ca)-tt)*B)
+
+        ifelse((sig*cj-tt)<0, mj<-0, mj<-(sig*cj-tt-uJt)/(1-z^(1-(uJt/(sig*cj-tt)))))
+        ifelse((sig*ca-tt)<0, ra<-0, ra<-(sig*ca-tt)*B)
         
         dJ.dt<- ra*A -mj*J - uJt *J
         
