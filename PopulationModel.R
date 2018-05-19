@@ -36,15 +36,21 @@ H<-1
 # temperature parabola opens upward
 HS<-10
 # uJ: juvenile mortality
-# uJ = 0.05 when C = 20
+# uJt = 0.05 when C = 20
 uJ<-1.625
+# uJmin: minimum juvenile mortality
+# when uJt=uJmin when uJ=0
+uJmin <- 0.022
 # uJe: activation energy of juvenile mortality
-uJe<--0.006
+uJe<--0.007
 # uA: adult mortality
-# uA = 0.005 when C = 20
+# uAt = 0.005 when C = 20
 uA<-1.625
-# uAe: activation energy og adult mortality
-uAe<--0.006
+# uAmin: minimum adult mortality
+# when uAt=uAmin when uA=0
+uAmin <- 0.022
+# uAe: activation energy of adult mortality
+uAe<--0.007
 # uR: resource mortality
 # uR = 0.005 when C = 20
 uR<-0.163
@@ -67,7 +73,7 @@ K<-5
 B<-0.5
 # boltzmann's constant
 kb<-8.617*10^-5
-# t: temperature in degrees celsius
+# C: temperature in degrees celsius
 # 20 is optimal, 10 is cold, 30 is hot
 C<-20
 
@@ -98,8 +104,8 @@ BaseStaget<-function(t,y,p){
         Mt<-M*exp(-(C-20)^2/(2*MS)^2)
         Ht<-H*exp((C-20)^2/(2*HS)^2)
         tt<-t*exp(te/(kb*C))
-        uJt<-uJ*exp(uJe/(kb*C))
-        uAt<-uA*exp(uAe/(kb*C))
+        uJt<-uJ*exp(uJe/(kb*C))+uJmin
+        uAt<-uA*exp(uAe/(kb*C))+uAmin
         uRt<-uR*exp(uRe/(kb*C))
         rt<-r*exp(-(C-20)^2/(2*rS)^2)
         
