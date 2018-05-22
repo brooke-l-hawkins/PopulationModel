@@ -108,7 +108,7 @@ BaseStaget<-function(t,y,p){
         uAt<-uA*exp(uAe/(kb*C))+uAmin
         uRt<-uR*exp(uRe/(kb*C))
         rt<-r*exp(-(C-20)^2/(2*rS)^2)
-        qt<-(-1/20)*C+2
+        qt<-(1/20)*C
         
         ca<-qt*Mt*(R/(Ht+R))
         cj<-(2-qt)*Mt*(R/(Ht+R))
@@ -169,7 +169,7 @@ iterations <- 0:50000
 iterations <- iterations/10
 if (b.plot) {
     # which state variable should be plotted in bifurcation plot?
-    b.var <- "Adults"
+    b.var <- "JARatio"
     # which proportion of iterations should be plotted in bifurcation plot?
     # ex. 0.25 will plot last quarter of iterations
     b.portion <- 0.25
@@ -204,10 +204,13 @@ for (j in 1:length(temp.seq)) {
     output[[j]] <- ode(y=y, time=iterations, BaseStaget, parms=parms.loop)
     # remove time column
     output[[j]] <- output[[j]][,-1]
+    # add juvenile to adult ratio
+    JARatio <- output[[j]][,"Juveniles"] / output[[j]][,"Adults"]
+    output[[j]] <- cbind(output[[j]], JARatio)
     
     # juvenile, adult, and resource dynamics plot
     if (dynamics.plot & sum(temp.seq[j]==c(10,15,20,25,30))==1) {
-        matplot(output[[j]],type="l",lty=1,pch=0.5,col=1:3, xlab='', ylab='')
+        matplot(output[[j]][,1:3],type="l",lty=1,pch=0.5,col=1:3, xlab='', ylab='')
         title(ylab=paste0(temp.name,"=",temp.seq[j]), cex.lab=1, font.lab=2)
     }
 
@@ -226,7 +229,7 @@ if (b.plot) {
     range.lim <- lapply(output, function(x) apply(x, 2, range))
     range.lim <- apply(do.call("rbind", range.lim), 2, range)
     plot(0, 0, pch = "", xlim = range(temp.seq), ylim = range.lim[,b.var],
-         xlab='', ylab='')
+         xlab='', ylab=b.var)
     
     # plot points
     for (j in 1:length(temp.seq)) {
