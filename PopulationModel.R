@@ -16,11 +16,6 @@ z<-0.2
 # p: adult modifier on production of juveniles
 # can use to modify stage structure, seems like it needs to be <1
 p<-0.4
-# q: competitive difference between adults and juveniles
-# q=1 means juveniles and adults are equal competitors
-# q=0.5 means juveniles are 3x better than adults
-# q=1.5 means adults 3x better than juveniles
-q<-1.5
 # sig: conversion efficiency of resource to useful energy for fish
 sig<-0.7
 # M: maximum ingestion rate
@@ -88,10 +83,15 @@ C<-20
 # uAt: mortality rate for adults
 # uRt: mortality rate for resources
 # rt: resource growth rate
+# qt: competitive difference between adults and juveniles
+    # q=1 means juveniles and adults are equal competitors
+    # q=0.5 means juveniles are 3x better than adults
+    # q=1.5 means adults 3x better than juveniles
 # ca: functional response for adults
 # cj: functional response for juveniles
 # mj: juvenile maturation rate
 # ra: reproduction per adult
+
 
 BaseStaget<-function(t,y,p){
     {
@@ -108,9 +108,10 @@ BaseStaget<-function(t,y,p){
         uAt<-uA*exp(uAe/(kb*C))+uAmin
         uRt<-uR*exp(uRe/(kb*C))
         rt<-r*exp(-(C-20)^2/(2*rS)^2)
+        qt<-(-1/20)*C+2
         
-        ca<-q*Mt*(R/(Ht+R))
-        cj<-(2-q)*Mt*(R/(Ht+R))
+        ca<-qt*Mt*(R/(Ht+R))
+        cj<-(2-qt)*Mt*(R/(Ht+R))
 
         ifelse((sig*cj-tt)<0, mj<-0, mj<-(sig*cj-tt-uJt)/(1-z^(1-(uJt/(sig*cj-tt)))))
         ifelse((sig*ca-tt)<0, ra<-0, ra<-(sig*ca-tt)*B)
@@ -177,7 +178,7 @@ if (b.plot) {
 # Run Simulation ---------------------------------------------------------------
 
 # create parameter vector
-parms<-c(z=z, p=p, q=q, sig=sig, M=M, MS=MS, H=H,HS=HS, uJ=uJ, uJe=uJe, uA=uA, 
+parms<-c(z=z, p=p, sig=sig, M=M, MS=MS, H=H,HS=HS, uJ=uJ, uJe=uJe, uA=uA, 
          uAe=uAe, uR=uR, uRe=uRe, t=t, te=te,r=r, rS=rS, K=K, B=B, kb=kb, C=C)
 # find index of temperature to change
 temp.index <- which(names(parms)==temp.name)
