@@ -31,7 +31,7 @@ H<-1
 # temperature parabola opens upward
 HS<-10
 # uJ: juvenile mortality
-# uJt = 0.05 when C = 20
+# uJt = 0.05 when C = 293.15
 uJ<-1.625
 # uJmin: minimum juvenile mortality
 # when uJt=uJmin when uJ=0
@@ -39,7 +39,7 @@ uJmin <- 0.022
 # uJe: activation energy of juvenile mortality
 uJe<--0.007
 # uA: adult mortality
-# uAt = 0.005 when C = 20
+# uAt = 0.005 when C = 293.15
 uA<-1.625
 # uAmin: minimum adult mortality
 # when uAt=uAmin when uA=0
@@ -47,13 +47,13 @@ uAmin <- 0.022
 # uAe: activation energy of adult mortality
 uAe<--0.007
 # uR: resource mortality
-# uR = 0.005 when C = 20
+# uR = 0.005 when C = 293.15
 uR<-0.163
 # uRe: activation energy of resource mortality
 uRe<--0.006
 # t: costs of maintaining somatic growth/turnover
 # i.e. base level of resource intake you must exceed to mature/reproduce
-# t = 0.1 when C = 20
+# t = 0.1 when C = 293.15
 t<-0.326
 # te: activation energy of metabolic waste
 te<--0.006
@@ -68,11 +68,11 @@ K<-5
 B<-0.5
 # boltzmann's constant
 kb<-8.617*10^-5
-# C: temperature in degrees celsius
-# 20 is optimal, 10 is cold, 30 is hot
-C<-20
-# Copt: optimal temperature in degrees celsius
-Copt<-20
+# C: temperature in kelvin
+# 283.15 is cold, 293.15 is optimal, 303.15 is hot
+C<-293.15
+# Copt: optimal temperature in kelvin
+Copt<-293.15
 
 #### ODE FUNCTIONS #############################################################
 
@@ -140,7 +140,7 @@ r.initial <- 1 # resources
 # enter name of temperature parameter
 temp.name <- "C"
 # choose range of temperatures
-temp.seq <- seq(10,30,length = 21)
+temp.seq <- seq(Copt-10,Copt+10,length = 21)
 
 # Set Plot Preferences ---------------------------------------------------------
 
