@@ -138,8 +138,8 @@ temp.seq <- seq(Copt-10,Copt+10,length = 21)
 # Set Plot Preferences ---------------------------------------------------------
 
 # plot juvenile, adult, and resource dynamics?
-# TODO add dynamics.to.plot <- c(10,15,20,25,30)
 dynamics.plot = T
+dynamics.to.plot <- c(Copt-10, Copt-5, Copt, Copt+5, Copt+10)
 # plot bifurcation plot?
 b.plot = T
 
@@ -204,7 +204,7 @@ for (j in 1:length(temp.seq)) {
     output[[j]] <- cbind(output[[j]], JARatio)
     
     # juvenile, adult, and resource dynamics plot
-    if (dynamics.plot & sum(temp.seq[j]==c(10,15,20,25,30))==1) {
+    if (dynamics.plot & sum(temp.seq[j]==dynamics.to.plot)==1) {
         matplot(output[[j]][,1:3],type="l",lty=1,pch=0.5,col=1:3, xlab='', ylab='')
         title(ylab=paste0(temp.name,"=",temp.seq[j]), cex.lab=1, font.lab=2)
     }
