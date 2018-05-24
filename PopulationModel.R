@@ -103,7 +103,7 @@ BaseStaget<-function(t,y,p){
         uAt<-uA*exp(uAe/(kb*C))
         uRt<-uR*exp(uRe/(kb*C))
         rt<-r*exp(-(C-Copt)^2/(2*rS)^2)
-        qt<--0.05*C+1+0.05*Copt
+        qt<-0.05*C+1-0.05*Copt
         
         ca<-qt*Mt*(R/(Ht+R))
         cj<-(2-qt)*Mt*(R/(Ht+R))
