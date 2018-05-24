@@ -32,20 +32,14 @@ H<-1
 HS<-10
 # uJ: juvenile mortality
 # uJt = 0.05 when C = 293.15
-uJ<-1.625
-# uJmin: minimum juvenile mortality
-# when uJt=uJmin when uJ=0
-uJmin <- 0.022
+uJ<-10000
 # uJe: activation energy of juvenile mortality
-uJe<--0.007
+uJe<--0.308
 # uA: adult mortality
 # uAt = 0.005 when C = 293.15
-uA<-1.625
-# uAmin: minimum adult mortality
-# when uAt=uAmin when uA=0
-uAmin <- 0.022
+uA<-10000
 # uAe: activation energy of adult mortality
-uAe<--0.007
+uAe<--0.308
 # uR: resource mortality
 # uR = 0.005 when C = 293.15
 uR<-0.163
@@ -106,8 +100,8 @@ BaseStaget<-function(t,y,p){
         Mt<-M*exp(-(C-Copt)^2/(2*MS)^2)
         Ht<-H*exp((C-Copt)^2/(2*HS)^2)
         tt<-t*exp(te/(kb*C))
-        uJt<-uJ*exp(uJe/(kb*C))+uJmin
-        uAt<-uA*exp(uAe/(kb*C))+uAmin
+        uJt<-uJ*exp(uJe/(kb*C))
+        uAt<-uA*exp(uAe/(kb*C))
         uRt<-uR*exp(uRe/(kb*C))
         rt<-r*exp(-(C-Copt)^2/(2*rS)^2)
         qt<-(1/20)*C
