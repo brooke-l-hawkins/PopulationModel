@@ -80,9 +80,9 @@ Copt<-293.15
 # uRt: mortality rate for resources
 # rt: resource growth rate
 # qt: competitive difference between adults and juveniles
-    # q=1 means juveniles and adults are equal competitors
-    # q=0.5 means juveniles are 3x better than adults
-    # q=1.5 means adults 3x better than juveniles
+    # qt=1 when juveniles and adults are equal competitors
+    # qt=0.5 when juveniles are 3x better than adults
+    # qt=1.5 when adults 3x better than juveniles
 # ca: functional response for adults
 # cj: functional response for juveniles
 # mj: juvenile maturation rate
@@ -96,7 +96,6 @@ BaseStaget<-function(t,y,p){
         R<-y[3]
     }
     with(as.list(p),{
-        # TODO add tOpt values; MtOpt = 20, HtOpt = 20; rtOpt = 20
         Mt<-M*exp(-(C-Copt)^2/(2*MS)^2)
         Ht<-H*exp((C-Copt)^2/(2*HS)^2)
         tt<-t*exp(te/(kb*C))
