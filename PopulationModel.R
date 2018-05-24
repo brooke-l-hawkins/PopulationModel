@@ -42,9 +42,9 @@ uA<-10000
 uAe<--0.308
 # uR: resource mortality
 # uR = 0.005 when C = 293.15
-uR<-0.163
+uR<-10000
 # uRe: activation energy of resource mortality
-uRe<--0.006
+uRe<--0.308
 # t: costs of maintaining somatic growth/turnover
 # i.e. base level of resource intake you must exceed to mature/reproduce
 # t = 0.1 when C = 293.15
