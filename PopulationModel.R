@@ -71,6 +71,8 @@ kb<-8.617*10^-5
 # C: temperature in degrees celsius
 # 20 is optimal, 10 is cold, 30 is hot
 C<-20
+# Copt: optimal temperature in degrees celsius
+Copt<-20
 
 #### ODE FUNCTIONS #############################################################
 
@@ -101,13 +103,13 @@ BaseStaget<-function(t,y,p){
     }
     with(as.list(p),{
         # TODO add tOpt values; MtOpt = 20, HtOpt = 20; rtOpt = 20
-        Mt<-M*exp(-(C-20)^2/(2*MS)^2)
-        Ht<-H*exp((C-20)^2/(2*HS)^2)
+        Mt<-M*exp(-(C-Copt)^2/(2*MS)^2)
+        Ht<-H*exp((C-Copt)^2/(2*HS)^2)
         tt<-t*exp(te/(kb*C))
         uJt<-uJ*exp(uJe/(kb*C))+uJmin
         uAt<-uA*exp(uAe/(kb*C))+uAmin
         uRt<-uR*exp(uRe/(kb*C))
-        rt<-r*exp(-(C-20)^2/(2*rS)^2)
+        rt<-r*exp(-(C-Copt)^2/(2*rS)^2)
         qt<-(1/20)*C
         
         ca<-qt*Mt*(R/(Ht+R))
