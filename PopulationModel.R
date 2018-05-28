@@ -36,21 +36,21 @@ uJ<-10000
 # uJe: activation energy of juvenile mortality
 uJe<--0.308
 # uA: adult mortality
-# uAt = 0.005 when C = 293.15
+# uAt = 0.05 when C = 293.15
 uA<-10000
 # uAe: activation energy of adult mortality
 uAe<--0.308
 # uR: resource mortality
 # uR = 0.005 when C = 293.15
-uR<-10000
+uR<-1000
 # uRe: activation energy of resource mortality
 uRe<--0.308
 # t: costs of maintaining somatic growth/turnover
 # i.e. base level of resource intake you must exceed to mature/reproduce
 # t = 0.1 when C = 293.15
-t<-0.326
+t<-10000
 # te: activation energy of metabolic waste
-te<--0.006
+te<--0.291
 # r: resource growth rate
 r<-1.5
 # rS: function breadth for resource growth rate
