@@ -123,6 +123,10 @@ BaseStaget<-function(t,y,p){
 
 #### SIMULATION ################################################################
 
+# Choose How Long to Run -------------------------------------------------------
+iterations <- 0:25000
+iterations <- iterations/10
+
 # Set State Variables ----------------------------------------------------------
 j.initial <- 1 # juveniles
 a.initial <- 1 # adults
@@ -160,14 +164,14 @@ if (dynamics.plot & b.plot) {
         mar=c(2,3,2,1), mgp=c(1.5,0.5,0))
 }
 
-iterations <- 0:50000
+iterations <- 0:25000
 iterations <- iterations/10
 if (b.plot) {
     # which state variable should be plotted in bifurcation plot?
     b.var <- "JARatio"
     # which proportion of iterations should be plotted in bifurcation plot?
     # ex. 0.25 will plot last quarter of iterations
-    b.portion <- 0.25
+    b.portion <- 0.5
 }
 
 # Run Simulation ---------------------------------------------------------------
