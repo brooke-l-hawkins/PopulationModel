@@ -143,35 +143,35 @@ temp.seq <- seq(Copt-10,Copt+10,length = 21)
 
 # plot juvenile, adult, and resource dynamics?
 dynamics.plot = T
-dynamics.to.plot <- c(Copt-10, Copt-5, Copt, Copt+5, Copt+10)
-# plot bifurcation plot?
-b.plot = T
-
-# layout for plots
-#TODO generalize
-if (dynamics.plot & b.plot) {
-    # first rows have dynamics plots
-    # last row has bifurcation plots
-    par(mfcol=c(6,1),
-        mar=c(2,3,2,1), mgp=c(1.5,0.5,0))
-} else if (dynamics.plot) {
-    # rows have dynamics plots for one value in temp.seq
-    par(mfcol=c(length(temp.seq),1),
-        mar=c(2,3,2,1), mgp=c(1.5,0.5,0))
-} else if (b.plot) {
-    # one bifurcation plot
-    par(mfcol=c(1,1),
-        mar=c(2,3,2,1), mgp=c(1.5,0.5,0))
+if (dynamics.plot){
+    # which dynamics to plot?
+    dynamics.to.plot <- c(Copt-10, Copt-5, Copt, Copt+5, Copt+10)  
 }
 
-iterations <- 0:25000
-iterations <- iterations/10
+# plot bifurcation plot?
+b.plot = T
 if (b.plot) {
     # which state variable should be plotted in bifurcation plot?
-    b.var <- "JARatio"
+    b.vars <- c("JARatio", "Juveniles", "Adults")
     # which proportion of iterations should be plotted in bifurcation plot?
     # ex. 0.25 will plot last quarter of iterations
     b.portion <- 0.5
+}
+
+# layout for plots
+if (dynamics.plot & b.plot) {
+    # starting rows have dynamics plots
+    # last rows have bifurcation plots
+    par(mfcol=c(length(dynamics.to.plot)+length(b.vars),1),
+        mar=c(2,3,2,1), mgp=c(1.5,0.5,0))
+} else if (dynamics.plot) {
+    # rows have dynamics plots for one value in temp.seq
+    par(mfcol=c(length(dynamics.to.plot),1),
+        mar=c(2,3,2,1), mgp=c(1.5,0.5,0))
+} else if (b.plot) {
+    # rows have bifurcation plots
+    par(mfcol=c(length(b.vars),1),
+        mar=c(2,3,2,1), mgp=c(1.5,0.5,0))
 }
 
 # Run Simulation ---------------------------------------------------------------
@@ -208,9 +208,11 @@ for (j in 1:length(temp.seq)) {
     output[[j]] <- cbind(output[[j]], JARatio)
     
     # juvenile, adult, and resource dynamics plot
-    if (dynamics.plot & sum(temp.seq[j]==dynamics.to.plot)==1) {
-        matplot(output[[j]][,1:3],type="l",lty=1,pch=0.5,col=1:3, xlab='', ylab='')
-        title(ylab=paste0(temp.name,"=",temp.seq[j]), cex.lab=1, font.lab=2)
+    if (dynamics.plot) {
+        if (sum(temp.seq[j]==dynamics.to.plot)==1) {
+            matplot(output[[j]][,1:3],type="l",lty=1,pch=0.5,col=1:3, xlab='', ylab='')
+            title(ylab=paste0(temp.name,"=",temp.seq[j]), cex.lab=1, font.lab=2)
+        }
     }
 
 } # end temp.seq loop
@@ -227,13 +229,18 @@ if (b.plot) {
     # set up plot axes and labels
     range.lim <- lapply(output, function(x) apply(x, 2, range))
     range.lim <- apply(do.call("rbind", range.lim), 2, range)
-    plot(0, 0, pch = "", xlim = range(temp.seq), ylim = range.lim[,b.var],
-         xlab='', ylab=b.var)
     
-    # plot points
-    for (j in 1:length(temp.seq)) {
-        points(rep(temp.seq[j], length(b.rows)), output[[j]][b.rows,b.var])
+    for (b in b.vars) {
+        # set up axes
+        plot(0, 0, pch = "", xlim = range(temp.seq), ylim = range.lim[,b],
+             xlab='', ylab=b)
+        
+        # plot points
+        for (j in 1:length(temp.seq)) {
+            points(rep(temp.seq[j], length(b.rows)), output[[j]][b.rows,b])
+        }
     }
+    
 }
 
 #### RUNTIME ###################################################################
