@@ -20,7 +20,7 @@ p<-0.4
 sig<-0.7
 # M: maximum ingestion rate
 # make mass specific?
-M<-0.5
+M<-1
 # MS: function breadth for max intake rate
 # i.e. attack rate, opens downward
 MS<-10
