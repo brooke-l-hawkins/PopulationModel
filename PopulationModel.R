@@ -8,9 +8,6 @@ start <- proc.time()
 
 #### PARAMETERS ################################################################
 
-# t subscript in variable name indicates temperature-sensitive
-# base terms are now the scaling factor for temperature-sensitive terms
-
 # z: adult to juvenile size ratio
 z<-0.2
 # p: adult modifier on production of juveniles
