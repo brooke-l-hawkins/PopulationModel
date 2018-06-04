@@ -37,24 +37,36 @@ uJe<--0.308
 uA<-10000
 # uAe: activation energy of adult mortality
 uAe<--0.308
-# uR: resource mortality
+# uR1: shared resource mortality
+# uR2: adult-specific resource mortality
 # uR = 0.005 when C = 293.15
-uR<-1000
-# uRe: activation energy of resource mortality
-uRe<--0.308
+uR1<-uR2<-1000
+# uR1e: activation energy of shared resource mortality
+# uR2e: activation energy of adult-specific resource mortality
+uR1e<-uR2e<--0.308
 # t: costs of maintaining somatic growth/turnover
 # i.e. base level of resource intake you must exceed to mature/reproduce
 # t = 0.1 when C = 293.15
 t<-10000
 # te: activation energy of metabolic waste
 te<--0.291
-# r: resource growth rate
-r<-1.5
-# rS: function breadth for resource growth rate
+# r1: shared resource growth rate
+# r2: adult-specific resource growth rate
+r1<-r2<-1.5
+# r1S: function breadth for shared resource growth rate
+# r2S: function breadth for adult-specific resource growth rate
 # temperature parabola opens downward
-rS<-15
-# K: resource carrying capacity
-K<-5
+r1S<-r2S<-15
+# r2p: adult-specific resource growth rate
+# r2p: adult preference for adult-specific resource
+# fraction between 0 and 1
+# r2p=0 when adults ignore adult-specific resource
+# r2p=0.5 when adults prefer shared and adult-specific resources equally
+# r2p=1 when adults ignore shared resource
+r2p<-0
+# K1: shared resource carrying capacity
+# K2: adult-specific resource carrying capacity
+K1<-K2<-5
 # B: adult reproductive rate
 B<-0.5
 # boltzmann's constant
@@ -74,8 +86,10 @@ Copt<-293.15
 # tt: costs of maintaining somatic growth/turnover
 # uJt: mortality rate for juveniles
 # uAt: mortality rate for adults
-# uRt: mortality rate for resources
-# rt: resource growth rate
+# uR1t: mortality rate for shared resources
+# uR2t: mortality rate for adult-specific resources
+# r1t: resource growth rate
+# r2t: adult-specific resource growth rate
 # qt: competitive difference between adults and juveniles
     # qt=1 when juveniles and adults are equal competitors
     # qt=0.5 when juveniles are 3x better than adults
@@ -90,7 +104,8 @@ BaseStaget<-function(t,y,p){
     {
         J<-y[1]
         A<-y[2]
-        R<-y[3]
+        R1<-y[3]
+        R2<-y[4]
     }
     with(as.list(p),{
         Mt<-M*exp(-(C-Copt)^2/(2*MS)^2)
@@ -98,23 +113,29 @@ BaseStaget<-function(t,y,p){
         tt<-t*exp(te/(kb*C))
         uJt<-uJ*exp(uJe/(kb*C))
         uAt<-uA*exp(uAe/(kb*C))
-        uRt<-uR*exp(uRe/(kb*C))
-        rt<-r*exp(-(C-Copt)^2/(2*rS)^2)
+        uR1t<-uR1*exp(uR1e/(kb*C))
+        uR2t<-uR2*exp(uR2e/(kb*C))
+        r1t<-r1*exp(-(C-Copt)^2/(2*r1S)^2)
+        r2t<-r2*exp(-(C-Copt)^2/(2*r2S)^2)
         qt<--0.01*(C-Copt)^2+1.5
         
-        ca<-qt*Mt*(R/(Ht+R))
-        cj<-(2-qt)*Mt*(R/(Ht+R))
+        #TODO work on functional response with R1 vs. R2
+        ca<-qt*Mt*((1-r2p)*R1+r2p*R2)/(Ht+(1-r2p)*R1+r2p*R2)
+        cj<-(2-qt)*Mt*R1/(Ht+R1)
 
+        #TODO work on stage-specific rates with R1 vs. R2
         ifelse((sig*cj-tt)<0, mj<-0, mj<-(sig*cj-tt-uJt)/(1-z^(1-(uJt/(sig*cj-tt)))))
         ifelse((sig*ca-tt)<0, ra<-0, ra<-(sig*ca-tt)*B)
         
-        dJ.dt<- ra*A -mj*J - uJt *J
+        dJ.dt<- ra*A - mj*J - uJt*J
         
-        dA.dt<- mj*J - uAt*A -ra*p*A
+        dA.dt<- mj*J - uAt*A - ra*p*A
         
-        dR.dt<- rt*R*(1-(R/K)) - cj*J - ca*A - uRt*R
+        #TODO work on resource rates with R1 vs. R2
+        dR1.dt<- r1t*R1*(1-(R1/K1)) - cj*J - (1-r2p)*ca*A - uR1t*R1
+        dR2.dt<- r2t*R2*(1-(R2/K2)) - r2p*ca*A - uR2t*R2
         
-        return(list(c(dJ.dt,dA.dt,dR.dt)))
+        return(list(c(dJ.dt, dA.dt, dR1.dt, dR2.dt)))
     })
 }
 
@@ -127,7 +148,8 @@ iterations <- iterations/10
 # Set State Variables ----------------------------------------------------------
 j.initial <- 1 # juveniles
 a.initial <- 1 # adults
-r.initial <- 1 # resources
+r1.initial <- 1 # shared resources
+r2.initial<- 1 # adult-specific resources
 
 # Set Parameters ---------------------------------------------------------------
 
@@ -174,8 +196,9 @@ if (dynamics.plot & b.plot) {
 # Run Simulation ---------------------------------------------------------------
 
 # create parameter vector
-parms<-c(z=z, p=p, sig=sig, M=M, MS=MS, H=H,HS=HS, uJ=uJ, uJe=uJe, uA=uA, 
-         uAe=uAe, uR=uR, uRe=uRe, t=t, te=te,r=r, rS=rS, K=K, B=B, kb=kb, C=C)
+parms<-c(z=z, p=p, sig=sig, M=M, MS=MS, H=H, HS=HS, uJ=uJ, uJe=uJe, uA=uA, uAe=uAe,
+         uR1=uR1, uR2=uR2, uR1e=uR1e, uR2e=uR2e, t=t, te=te, r1=r1, r2=r2,
+         r1S=r1S, r2S=r2S, K1=K1, K2=K2, B=B, kb=kb, C=C, Copt=Copt)
 # find index of temperature to change
 temp.index <- which(names(parms)==temp.name)
 
@@ -183,8 +206,8 @@ temp.index <- which(names(parms)==temp.name)
 output <- list()
 
 # initialize state variables
-y <- c(j.initial, a.initial, r.initial)
-names(y) <- c("Juveniles", "Adults", "Resources")
+y <- c(j.initial, a.initial, r.initial, ar.initial)
+names(y) <- c("Juveniles", "Adults", "Shared Resources", "Adult Resources")
 
 # initialize parameters to change within loop
 parms.loop <- parms
@@ -207,7 +230,7 @@ for (j in 1:length(temp.seq)) {
     # juvenile, adult, and resource dynamics plot
     if (dynamics.plot) {
         if (sum(temp.seq[j]==dynamics.to.plot)==1) {
-            matplot(output[[j]][,1:3],type="l",lty=1,pch=0.5,col=1:3, xlab='', ylab='')
+            matplot(output[[j]][,1:4],type="l",lty=1,pch=0.5,col=1:4, xlab='', ylab='')
             title(ylab=paste0(temp.name,"=",temp.seq[j]), cex.lab=1, font.lab=2)
         }
     }
