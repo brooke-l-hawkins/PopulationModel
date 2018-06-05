@@ -63,6 +63,8 @@ r1S<-r2S<-15
     # r2p=0.5 when adults access half of adult-specific resource
     # r2p=1   when adults access all of adult-specific resource
 r2p<-0.5
+# r1p: proportion of shared resource available to adults
+r1p<-1
 # K1: shared resource carrying capacity
 # K2: adult-specific resource carrying capacity
 K1<-K2<-5
@@ -118,8 +120,8 @@ BaseStaget<-function(t,y,p){
         r2t<-r2*exp(-(C-Copt)^2/(2*r2S)^2)
         qt<--0.01*(C-Copt)^2+1.5
         
-        ca1<-qt*Mt*R1/(Ht+R1+r2p*R2)
-        ca2<-qt*Mt*r2p*R2/(Ht+R1+r2p*R2)
+        ca1<-qt*Mt*r1p*R1/(Ht+r1p*(R1+r2p*R2))
+        ca2<-qt*Mt*r2p*R2/(Ht+r2p*(R1+r2p*R2))
         ca<-ca1+ca2
         cj<-(2-qt)*Mt*R1/(Ht+R1)
 
