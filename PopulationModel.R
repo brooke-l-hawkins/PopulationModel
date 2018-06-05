@@ -253,7 +253,10 @@ if (b.plot) {
         
         # plot points
         for (j in 1:length(temp.seq)) {
-            points(rep(temp.seq[j], length(b.rows)), output[[j]][b.rows,b])
+            max.val <- max(output[[j]][b.rows,b])
+            min.val <- min(output[[j]][b.rows,b])
+            extrema.val <- c(min.val, max.val)
+            points(rep(temp.seq[j], length(extrema.val)), extrema.val)
         }
     }
     
