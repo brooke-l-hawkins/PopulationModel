@@ -57,15 +57,12 @@ r1<-r2<-1.5
 # r2S: function breadth for adult-specific resource growth rate
 # temperature parabola opens downward
 r1S<-r2S<-15
-# r2p: adult preference for adult-specific resource
+# r2p: proportion of adult-specific resource available to adults
 # fraction between 0 and 1 (inclusive)
-    # r2p=0 when adults ignore adult-specific resource
-    # r2p=0.5 when adults prefer shared and adult-specific resources equally
-    # r2p=1 when adults ignore shared resource
-r2p<-0
-#r1p: adult preference for shared resource
-# fraction between 1 and 0 (inclusive)
-r1p<- 1-r2p
+    # r2p=0   when adults access none of adult-specific resource
+    # r2p=0.5 when adults access half of adult-specific resource
+    # r2p=1   when adults access all of adult-specific resource
+r2p<-0.5
 # K1: shared resource carrying capacity
 # K2: adult-specific resource carrying capacity
 K1<-K2<-5
@@ -121,8 +118,8 @@ BaseStaget<-function(t,y,p){
         r2t<-r2*exp(-(C-Copt)^2/(2*r2S)^2)
         qt<--0.01*(C-Copt)^2+1.5
         
-        ca1<-qt*Mt*r1p*R1/(Ht+r1p*(R1+R2))
-        ca2<-qt*Mt*r2p*R2/(Ht+r2p*(R1+R2))
+        ca1<-qt*Mt*R1/(Ht+R1+r2p*R2)
+        ca2<-qt*Mt*r2p*R2/(Ht+R1+r2p*R2)
         ca<-ca1+ca2
         cj<-(2-qt)*Mt*R1/(Ht+R1)
 
@@ -205,7 +202,7 @@ temp.index <- which(names(parms)==temp.name)
 output <- list()
 
 # initialize state variables
-y <- c(j.initial, a.initial, r.initial, ar.initial)
+y <- c(j.initial, a.initial, r1.initial, r2.initial)
 names(y) <- c("Juveniles", "Adults", "Shared Resources", "Adult Resources")
 
 # initialize parameters to change within loop
