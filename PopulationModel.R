@@ -57,13 +57,15 @@ r1<-r2<-1.5
 # r2S: function breadth for adult-specific resource growth rate
 # temperature parabola opens downward
 r1S<-r2S<-15
-# r2p: adult-specific resource growth rate
 # r2p: adult preference for adult-specific resource
-# fraction between 0 and 1
-# r2p=0 when adults ignore adult-specific resource
-# r2p=0.5 when adults prefer shared and adult-specific resources equally
-# r2p=1 when adults ignore shared resource
+# fraction between 0 and 1 (inclusive)
+    # r2p=0 when adults ignore adult-specific resource
+    # r2p=0.5 when adults prefer shared and adult-specific resources equally
+    # r2p=1 when adults ignore shared resource
 r2p<-0
+#r1p: adult preference for shared resource
+# fraction between 1 and 0 (inclusive)
+r1p<- 1-r2p
 # K1: shared resource carrying capacity
 # K2: adult-specific resource carrying capacity
 K1<-K2<-5
@@ -119,21 +121,18 @@ BaseStaget<-function(t,y,p){
         r2t<-r2*exp(-(C-Copt)^2/(2*r2S)^2)
         qt<--0.01*(C-Copt)^2+1.5
         
-        #TODO work on functional response with R1 vs. R2
-        ca<-qt*Mt*((1-r2p)*R1+r2p*R2)/(Ht+(1-r2p)*R1+r2p*R2)
+        ca1<-qt*Mt*r1p*R1/(Ht+r1p*(R1+R2))
+        ca2<-qt*Mt*r2p*R2/(Ht+r2p*(R1+R2))
+        ca<-ca1+ca2
         cj<-(2-qt)*Mt*R1/(Ht+R1)
 
-        #TODO work on stage-specific rates with R1 vs. R2
         ifelse((sig*cj-tt)<0, mj<-0, mj<-(sig*cj-tt-uJt)/(1-z^(1-(uJt/(sig*cj-tt)))))
         ifelse((sig*ca-tt)<0, ra<-0, ra<-(sig*ca-tt)*B)
         
         dJ.dt<- ra*A - mj*J - uJt*J
-        
         dA.dt<- mj*J - uAt*A - ra*p*A
-        
-        #TODO work on resource rates with R1 vs. R2
-        dR1.dt<- r1t*R1*(1-(R1/K1)) - cj*J - (1-r2p)*ca*A - uR1t*R1
-        dR2.dt<- r2t*R2*(1-(R2/K2)) - r2p*ca*A - uR2t*R2
+        dR1.dt<- r1t*R1*(1-(R1/K1)) - ca1*A - uR1t*R1 - cj*J
+        dR2.dt<- r2t*R2*(1-(R2/K2)) - ca2*A - uR2t*R2
         
         return(list(c(dJ.dt, dA.dt, dR1.dt, dR2.dt)))
     })
