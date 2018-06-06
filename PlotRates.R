@@ -30,30 +30,42 @@ uJe<--0.308
 uA<-10000
 # uAe: activation energy of adult mortality
 uAe<--0.308
-# uR: resource mortality
+# uR1: shared resource mortality
+# uR2: adult-specific resource mortality
 # uR = 0.005 when C = 293.15
-uR<-1000
-# uRe: activation energy of resource mortality
-uRe<--0.308
+uR1<-uR2<-1000
+# uR1e: activation energy of shared resource mortality
+# uR2e: activation energy of adult-specific resource mortality
+uR1e<-uR2e<--0.308
 # t: costs of maintaining somatic growth/turnover
 # i.e. base level of resource intake you must exceed to mature/reproduce
 # t = 0.1 when C = 293.15
 t<-10000
 # te: activation energy of metabolic waste
 te<--0.291
-# r: resource growth rate
-r<-1.5
-# rS: function breadth for resource growth rate
+# r1: shared resource growth rate
+# r2: adult-specific resource growth rate
+r1<-r2<-1.5
+# r1S: function breadth for shared resource growth rate
+# r2S: function breadth for adult-specific resource growth rate
 # temperature parabola opens downward
-rS<-15
-# K: resource carrying capacity
-K<-5
+r1S<-r2S<-15
+# r2p: proportion of adult-specific resource available to adults
+# fraction between 0 and 1 (inclusive)
+# r2p=0   when adults access none of adult-specific resource
+# r2p=0.5 when adults access half of adult-specific resource
+# r2p=1   when adults access all of adult-specific resource
+r2p<-0.5
+# r1p: proportion of shared resource available to adults
+r1p<-1
+# K1: shared resource carrying capacity
+# K2: adult-specific resource carrying capacity
+K1<-K2<-5
 # B: adult reproductive rate
 B<-0.5
 # boltzmann's constant
 kb<-8.617*10^-5
 # Copt: optimal temperature in kelvin
-# 283.15 is cold, 293.15 is optimal, 303.15 is hot
 Copt<-293.15
 
 # C: temperature in kelvin
@@ -61,7 +73,7 @@ Copt<-293.15
 C<-seq(from=Copt-10,to=Copt+10,length = 21)
 
 # initial state values
-R <- J <- A <- 1
+J <- A <- R1 <- R2 <- 1
 
 # plotting settings
 par(mfcol=c(3,2), mar=c(4,3,3,1))
@@ -89,13 +101,16 @@ Ht<-H*exp((C-Copt)^2/(2*HS)^2)
 tt<-t*exp(te/(kb*C))
 uJt<-uJ*exp(uJe/(kb*C))
 uAt<-uA*exp(uAe/(kb*C))
-uRt<-uR*exp(uRe/(kb*C))
-rt<-r*exp(-(C-Copt)^2/(2*rS)^2)
-
+uR1t<-uR1*exp(uR1e/(kb*C))
+uR2t<-uR2*exp(uR2e/(kb*C))
+r1t<-r1*exp(-(C-Copt)^2/(2*r1S)^2)
+r2t<-r2*exp(-(C-Copt)^2/(2*r2S)^2)
 qt<--0.01*(C-Copt)^2+1.5
 
-ca<-qt*Mt*(R/(Ht+R))
-cj<-(2-qt)*Mt*(R/(Ht+R))
+ca1<-qt*Mt*r1p*R1/(Ht+r1p*(R1+r2p*R2))
+ca2<-qt*Mt*r2p*R2/(Ht+r2p*(R1+r2p*R2))
+ca<-ca1+ca2
+cj<-(2-qt)*Mt*R1/(Ht+R1)
 
 mj.condition <- !(sig*cj-tt)<0
 mj <- (sig*cj-tt-uJt)/(1-z^(1-(uJt/(sig*cj-tt))))
@@ -105,9 +120,10 @@ ra.condition <- !(sig*ca-tt)<0
 ra <- (sig*ca-tt)*B
 ra <- ra.condition * ra
 
-dJ.dt<- ra*A -mj*J - uJt *J
-dA.dt<- mj*J - uAt*A -ra*p*A
-dR.dt<- rt*R*(1-(R/K)) - cj*J - ca*A - uRt*R
+dJ.dt<- ra*A - mj*J - uJt*J
+dA.dt<- mj*J - uAt*A - ra*p*A
+dR1.dt<- r1t*R1*(1-(R1/K1)) - ca1*A - uR1t*R1 - cj*J
+dR2.dt<- r2t*R2*(1-(R2/K2)) - ca2*A - uR2t*R2
 
 #### PLOTS #####################################################################
 
@@ -121,24 +137,28 @@ legend("topleft", legend=c("Mt", "Ht", "tt"),
        col=4:6, lty=1)
 
 plot(uJt~C, type='l', col=1, main="mortality rates",
-     ylim=range(uJt, uAt, uRt))
+     ylim=range(uJt, uAt, uR1t, uR2t))
 lines(C, uAt, col=2)
-lines(C, uRt, col=3)
-legend("topleft", legend=c("uJt", "uAt", "uRt"),
-       col=1:3, lty=1)
+lines(C, uR1t, col=3)
+lines(C, uR2t, col=4)
+legend("topleft", legend=c("uJt", "uAt", "uR1t", "uR2t"),
+       col=1:4, lty=1)
 
 plot(dJ.dt~C, type='l', col=1, main="growth rates", 
-     ylim=range(dJ.dt, dA.dt, dR.dt))
+     ylim=range(dJ.dt, dA.dt, dR1.dt, dR2.dt))
 lines(C, dA.dt, col=2)
-lines(C, dR.dt, col=3)
-legend("topleft", legend=c("dJ.dt", "dA.dt", "dR.dt"),
-       col=1:3, lty=1)
+lines(C, dR1.dt, col=3)
+lines(C, dR2.dt, col=4)
+legend("topleft", legend=c("dJ.dt", "dA.dt", "dR1.dt", "dR2.dt"),
+       col=1:4, lty=1)
 
 plot(cj~C, type='l', col=1, main="functional response",
-     ylim=range(cj,ca))
-lines(C, ca, col=2)
-legend("topleft", legend=c("cj", "ca"),
-       col=1:2, lty=1)
+     ylim=range(cj,ca1,ca2,ca))
+lines(C, ca1, col=2)
+lines(C, ca2, col=3)
+lines(C, ca, col=4)
+legend("topleft", legend=c("cj", "ca1", "ca2", "ca"),
+       col=1:4, lty=1)
 
 plot(mj~C, type='l', col=1, main="stage specific rates",
      ylim=range(mj,ra))
