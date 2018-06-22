@@ -81,7 +81,7 @@ Copt<-293.15
 # create parameter vector
 parms.vec<-c(z=z, p=p, sig=sig, M=M, MS=MS, H=H, HS=HS, uJ=uJ, uJe=uJe, uA=uA,
             uAe=uAe, uR1=uR1, uR2=uR2, uR1e=uR1e, uR2e=uR2e, t=t, te=te, r1=r1,
-            r2=r2, r1S=r1S, r2S=r2S, r2p=r2p, r1p-r1p, K1=K1, K2=K2, B=B, kb=kb,
+            r2=r2, r1S=r1S, r2S=r2S, r2p=r2p, r1p=r1p, K1=K1, K2=K2, B=B, kb=kb,
             C=C, Copt=Copt)
 
 #### CHANGING PARAMETERS #######################################################
