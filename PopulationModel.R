@@ -266,11 +266,11 @@ if (b.plot) {
              xlab='', ylab=b)
         
         # plot points
-        for (j in 1:repetitions.length) {
-            max.val <- max(output[[j]][b.rows,b])
-            min.val <- min(output[[j]][b.rows,b])
+        for (r in 1:repetitions.length) {
+            max.val <- max(output[[r]][b.rows,b])
+            min.val <- min(output[[r]][b.rows,b])
             extrema.val <- c(min.val, max.val)
-            points(rep(C.seq[j], length(extrema.val)), extrema.val)
+            points(rep(C.seq[r], length(extrema.val)), extrema.val)
         }
     }
     
