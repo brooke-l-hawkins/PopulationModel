@@ -91,6 +91,11 @@ C.name <- "C"
 # choose range of temperatures
 C.seq <- seq(from=Copt-10, to=Copt+10, length=21)
 
+# enter name of proportion of adult-specific resource available to adults
+r2p.name <- "r2p"
+# choose range of proportions
+r2p.seq <- seq(from=r2p-0.25, to=r2p+0.25, length=21)
+
 # determine repetition length
 repetitions.length <- 21
 
@@ -99,6 +104,8 @@ parms.matrix <- matrix(data=parms.vec, nrow=length(parms.vec), ncol=repetitions.
 row.names(parms.matrix) <- names(parms.vec)
 # update temperature
 parms.matrix[C.name,] <- C.seq
+# update proportions
+parms.matrix[r2p.name,] <- r2p.seq
 
 #### ODE FUNCTIONS #############################################################
 
