@@ -78,13 +78,27 @@ C<-293.15
 # Copt: optimal temperature in kelvin
 Copt<-293.15
 
+# create parameter vector
+parms.vec<-c(z=z, p=p, sig=sig, M=M, MS=MS, H=H, HS=HS, uJ=uJ, uJe=uJe, uA=uA,
+            uAe=uAe, uR1=uR1, uR2=uR2, uR1e=uR1e, uR2e=uR2e, t=t, te=te, r1=r1,
+            r2=r2, r1S=r1S, r2S=r2S, r2p=r2p, r1p-r1p, K1=K1, K2=K2, B=B, kb=kb,
+            C=C, Copt=Copt)
+
 #### CHANGING PARAMETERS #######################################################
 
 # enter name of temperature parameter
 C.name <- "C"
 # choose range of temperatures
-C.seq <- seq(Copt-10,Copt+10,length = 21)
+C.seq <- seq(from=Copt-10, to=Copt+10, length=21)
 
+# determine repetition length
+repetitions.length <- 21
+
+# create parameter matrix
+parms.matrix <- matrix(data=parms.vec, nrow=length(parms.vec), ncol=repetitions.length)
+row.names(parms.matrix) <- names(parms.vec)
+# update temperature
+parms.matrix[C.name,] <- C.seq
 
 #### ODE FUNCTIONS #############################################################
 
@@ -193,21 +207,6 @@ if (dynamics.plot & b.plot) {
 }
 
 # Run Simulation ---------------------------------------------------------------
-
-# create parameter vector
-parms<-c(z=z, p=p, sig=sig, M=M, MS=MS, H=H, HS=HS, uJ=uJ, uJe=uJe, uA=uA, uAe=uAe,
-         uR1=uR1, uR2=uR2, uR1e=uR1e, uR2e=uR2e, t=t, te=te, r1=r1, r2=r2,
-         r1S=r1S, r2S=r2S, K1=K1, K2=K2, B=B, kb=kb, C=C, Copt=Copt)
-
-# determine repetition length
-repetitions.length <- length(C.seq)
-
-# create parameter matrix
-parms.matrix <- matrix(data=parms, nrow=length(parms), ncol=repetitions.length)
-row.names(parms.matrix) <- names(parms)
-
-# update temperature
-parms.matrix[C.name,] <- C.seq
 
 # initialize list to store output
 output <- list()
