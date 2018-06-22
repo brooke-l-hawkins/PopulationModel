@@ -6,85 +6,81 @@ library(deSolve)
 # start timing script
 start <- proc.time()
 
-#### PARAMETERS ################################################################
+#### VARIABLES #################################################################
 
-# z: adult to juvenile size ratio
-z<-0.2
-# p: adult modifier on production of juveniles
-# can use to modify stage structure, seems like it needs to be <1
-p<-0.4
-# sig: conversion efficiency of resource to useful energy for fish
-sig<-0.7
-# M: maximum ingestion rate
-# make mass specific?
-M<-1
-# MS: function breadth for max intake rate
-# i.e. attack rate, opens downward
-MS<-10
-# H: handling time
-# speed at which fish can eat resources (smaller is faster)
-H<-1
-# HS: function breadth for handling time
-# temperature parabola opens upward
-HS<-10
-# uJ: juvenile mortality
-# uJt = 0.05 when C = 293.15
-uJ<-10000
-# uJe: activation energy of juvenile mortality
-uJe<--0.308
-# uA: adult mortality
-# uAt = 0.05 when C = 293.15
-uA<-10000
-# uAe: activation energy of adult mortality
-uAe<--0.308
-# uR1: shared resource mortality
-# uR2: adult-specific resource mortality
-# uR = 0.005 when C = 293.15
-uR1<-uR2<-1000
-# uR1e: activation energy of shared resource mortality
-# uR2e: activation energy of adult-specific resource mortality
-uR1e<-uR2e<--0.308
-# t: costs of maintaining somatic growth/turnover
-# i.e. base level of resource intake you must exceed to mature/reproduce
-# t = 0.1 when C = 293.15
-t<-10000
-# te: activation energy of metabolic waste
-te<--0.291
-# r1: shared resource growth rate
-# r2: adult-specific resource growth rate
-r1<-r2<-1.5
-# r1S: function breadth for shared resource growth rate
-# r2S: function breadth for adult-specific resource growth rate
-# temperature parabola opens downward
-r1S<-r2S<-15
-# r2p: proportion of adult-specific resource available to adults
-# fraction between 0 and 1 (inclusive)
-    # r2p=0   when adults access none of adult-specific resource
-    # r2p=0.5 when adults access half of adult-specific resource
-    # r2p=1   when adults access all of adult-specific resource
-r2p<-0.5
-# r1p: proportion of shared resource available to adults
-r1p<-1
-# K1: shared resource carrying capacity
-# K2: adult-specific resource carrying capacity
-K1<-K2<-5
-# B: adult reproductive rate
-B<-0.5
-# boltzmann's constant
-kb<-8.617*10^-5
-# C: temperature in kelvin
-# 283.15 is cold, 293.15 is optimal, 303.15 is hot
-C<-293.15
-# Copt: optimal temperature in kelvin
-Copt<-293.15
+# Parameters -------------------------------------------------------------------
 
-# create parameter vector
-parms.vec<-c(z=z, p=p, sig=sig, M=M, MS=MS, H=H, HS=HS, uJ=uJ, uJe=uJe, uA=uA,
-            uAe=uAe, uR1=uR1, uR2=uR2, uR1e=uR1e, uR2e=uR2e, t=t, te=te, r1=r1,
-            r2=r2, r1S=r1S, r2S=r2S, r2p=r2p, r1p=r1p, K1=K1, K2=K2, B=B, kb=kb,
-            C=C, Copt=Copt)
+z    <- 0.2         # adult to juvenile size ratio
+p    <- 0.4         # adult modifier on production of juveniles
+                    # can use to modify stage structure
+                    # seems like it needs to be <1
+sig  <- 0.7         # conversion efficiency of resource to useful energy for fish
+M    <- 1           # maximum ingestion rate
+                    # make mass-specific?
+                    # Mt vs. temperature forms a negative parabola
+MS   <- 10          # function breadth for max intake rate
+                    # attack rate
+H    <- 1           # handling time
+                    # speed at which fish can eat resources (smaller is faster)
+HS   <- 10          # function breadth for handling time
+                    # HSt vs. temperature forms a negative parabola
+uJ   <- 10000       # juvenile mortality
+                    # uJt = 0.05 when C = 293.15
+uA   <- 10000       # adult mortality
+                    # uAt = 0.05 when C = 293.15
+uJe  <- -0.308      # activation energy of juvenile mortality
+uAe  <- -0.308      # activation energy of adult mortality
+uR1  <- 1000        # shared resource mortality
+uR2  <- 1000        # adult-specific resource mortality
+                    # uRt = 0.005 when C = 293.15
+uR1e <- -0.308      # activation energy of shared resource mortality
+uR2e <- -0.308      # activation energy of adult-specific resource mortality
+t    <- 10000       # costs of maintaining somatic growth/turnover
+                    # base level of resource intake you must exceed to mature/reproduce
+                    # tt = 0.1 when C = 293.15
+te   <- -0.291      # activation energy of metabolic waste
+r1   <- 1.5         # shared resource growth rate
+r2   <- 1.5         # adult-specific resource growth rate
+                    # r1t and r2t vs. temperature forms a negative parabola
+r1S  <- 15          # function breadth for shared resource growth rate
+r2S  <- 15          # function breadth for adult-specific resource growth rate
+r1p  <- 1           # proportion of shared resource available to adults
+r2p  <- 0.5         # proportion of adult-specific resource available to adults
+                    # r2p is a fraction between 0 and 1 (inclusive)
+                    # r2p=0   when adults access none of adult-specific resource
+                    # r2p=0.5 when adults access half of adult-specific resource
+                    # r2p=1   when adults access all of adult-specific resource
+K1   <- 5           # shared resource carrying capacity
+K2   <- 5           # adult-specific resource carrying capacity
+B    <- 0.5         # adult reproductive rate
+kb   <- 8.617*10^-5 # boltzmann's constant
+C    <- 293.15      # temperature in kelvin
+                    # 283.15 is cold, 293.15 is optimal, 303.15 is hot
+Copt <- 293.15      # optimal temperature in kelvin
 
-#### CHANGING PARAMETERS #######################################################
+# Initial State Variables ------------------------------------------------------
+
+j.initial  <- 1     # juveniles
+a.initial  <- 1     # adults
+r1.initial <- 1     # shared resources
+r2.initial <- 1     # adult-specific resources
+
+# Create Variable Vector -------------------------------------------------------
+
+variable.vec <- c(z=z, p=p, sig=sig, M=M, MS=MS, H=H, HS=HS, uJ=uJ, uA=uA,
+                  uJe=uJe, uAe=uAe, uR1=uR1, uR2=uR2, uR1e=uR1e, uR2e=uR2e, t=t,
+                  te=te, r1=r1, r2=r2, r1S=r1S, r2S=r2S, r1p=r1p, r2p=r2p,
+                  K1=K1, K2=K2, B=B, kb=kb, C=C, Copt=Copt, j.initial=j.initial,
+                  a.initial=a.initial, r1.initial=r1.initial,
+                  r2.initial=r2.initial)
+
+# enter indices of parameters in variable.vec
+parameters.indices <- 1:29
+
+# enter indices of initial state variables in variable.vec
+state.indices <- 30:33
+
+#### CHANGING VARIABLES ########################################################
 
 # enter name of temperature parameter
 C.name <- "C"
@@ -100,12 +96,15 @@ r2p.seq <- seq(from=r2p-0.25, to=r2p+0.25, length=3)
 repetitions.length <- length(C.seq)*length(r2p.seq)
 
 # create parameter matrix
-parms.matrix <- matrix(data=parms.vec, nrow=length(parms.vec), ncol=repetitions.length)
-row.names(parms.matrix) <- names(parms.vec)
+variable.matrix <- matrix(data=variable.vec, nrow=length(variable.vec),
+                          ncol=repetitions.length)
+row.names(variable.matrix) <- names(variable.vec)
+
 # update temperature
-parms.matrix[C.name,] <- rep(C.seq, times=length(r2p.seq))
+variable.matrix[C.name,] <- rep(C.seq, times=length(r2p.seq))
+
 # update proportions
-parms.matrix[r2p.name,] <- rep(r2p.seq, each=length(C.seq))
+variable.matrix[r2p.name,] <- rep(r2p.seq, each=length(C.seq))
 
 #### ODE FUNCTIONS #############################################################
 
@@ -128,7 +127,6 @@ parms.matrix[r2p.name,] <- rep(r2p.seq, each=length(C.seq))
 # cj: functional response for juveniles
 # mj: juvenile maturation rate
 # ra: reproduction per adult
-
 
 BaseStaget<-function(t,y,p){
     {
@@ -172,12 +170,6 @@ BaseStaget<-function(t,y,p){
 iterations <- 0:25000
 iterations <- iterations/10
 
-# Set State Variables ----------------------------------------------------------
-j.initial <- 1 # juveniles
-a.initial <- 1 # adults
-r1.initial <- 1 # shared resources
-r2.initial<- 1 # adult-specific resources
-
 # Dynamics Plot Preferences ----------------------------------------------------
 
 # plot juvenile, adult, and resource dynamics?
@@ -197,17 +189,17 @@ if (dynamics.plot){
 # initialize list to store output
 output <- list()
 
-# initialize state variables
-y <- c(j.initial, a.initial, r1.initial, r2.initial)
-names(y) <- c("Juveniles", "Adults", "Shared Resources", "Adult Resources")
-
-# loop to change temperature
 for (r in 1:repetitions.length) {
+    
     print(paste0("Starting simulation for repetition ",r))
     
-    # set temperature
-    parms <- parms.matrix[,r]
+    # set parameters
+    parms <- variable.matrix[parameters.indices, r]
 
+    # set initial state variables
+    y <- variable.matrix[state.indices, r]
+    names(y) <- c("Juveniles", "Adults", "Shared Resources", "Adult Resources")
+    
     # run simulation
     output[[r]] <- ode(y=y, time=iterations, BaseStaget, parms=parms)
     # remove time column
@@ -219,12 +211,12 @@ for (r in 1:repetitions.length) {
     # juvenile, adult, and resources dynamics plot
     if (dynamics.plot) {
         # if parameter is included in parameters for dynamics to plot
-        if (sum(parms.matrix[C.name,r]==C.dynamics.to.plot)==1 &
-            sum(parms.matrix[r2p.name,r]==r2p.dynamics.to.plot)==1) {
+        if (sum(variable.matrix[C.name,r]==C.dynamics.to.plot)==1 &
+            sum(variable.matrix[r2p.name,r]==r2p.dynamics.to.plot)==1) {
             # plot dynamics
             matplot(output[[r]][,1:4],type="l",lty=1,pch=0.5,col=1:4, xlab='', ylab='')
-            title(ylab=paste0(C.name,"=",parms.matrix[C.name,r]), 
-                  main=paste0(r2p.name,"=",parms.matrix[r2p.name,r]),
+            title(ylab=paste0(C.name,"=",variable.matrix[C.name,r]), 
+                  main=paste0(r2p.name,"=",variable.matrix[r2p.name,r]),
                   cex.lab=1, font.lab=2)
         }
     }
@@ -260,7 +252,7 @@ if (b.plot) {
     
     for (b in b.vars) {
         # set up axes
-        plot(0, 0, pch = "", xlim = range(parms.matrix[C.name,]), ylim = range.lim[,b],
+        plot(0, 0, pch = "", xlim = range(variable.matrix[C.name,]), ylim = range.lim[,b],
              xlab='', ylab=b)
         
         # plot points
@@ -268,8 +260,8 @@ if (b.plot) {
             max.val <- max(output[[r]][b.rows,b])
             min.val <- min(output[[r]][b.rows,b])
             # which.r2p used to assign colors and offset lines in plot
-            which.r2p <- which(r2p.seq==parms.matrix[r2p.name,r])
-            lines(x=rep(parms.matrix[C.name,r], 2)+which.r2p*0.1,
+            which.r2p <- which(r2p.seq==variable.matrix[r2p.name,r])
+            lines(x=rep(variable.matrix[C.name,r], 2)+which.r2p*0.1,
                   y=c(min.val, max.val), col=which.r2p)
         }
     }
