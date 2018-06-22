@@ -270,7 +270,7 @@ if (b.plot) {
             max.val <- max(output[[r]][b.rows,b])
             min.val <- min(output[[r]][b.rows,b])
             extrema.val <- c(min.val, max.val)
-            points(rep(C.seq[r], length(extrema.val)), extrema.val)
+            lines(rep(C.seq[r], length(extrema.val)), extrema.val, col=1)
         }
     }
     
