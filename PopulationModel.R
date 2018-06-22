@@ -167,7 +167,7 @@ BaseStaget<-function(t,y,p){
 #### SIMULATION ################################################################
 
 # Choose How Long to Run -------------------------------------------------------
-iterations <- 0:25000
+iterations <- 0:10000
 iterations <- iterations/10
 
 # Dynamics Plot Preferences ----------------------------------------------------
