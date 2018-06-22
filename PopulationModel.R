@@ -78,6 +78,14 @@ C<-293.15
 # Copt: optimal temperature in kelvin
 Copt<-293.15
 
+#### CHANGING PARAMETERS #######################################################
+
+# enter name of temperature parameter
+C.name <- "C"
+# choose range of temperatures
+C.seq <- seq(Copt-10,Copt+10,length = 21)
+
+
 #### ODE FUNCTIONS #############################################################
 
 # t subscript in variable name indicates temperature-sensitive
@@ -118,7 +126,7 @@ BaseStaget<-function(t,y,p){
         uR2t<-uR2*exp(uR2e/(kb*C))
         r1t<-r1*exp(-(C-Copt)^2/(2*r1S)^2)
         r2t<-r2*exp(-(C-Copt)^2/(2*r2S)^2)
-        qt<--0.01*(C-Copt)^2+1.5
+        qt<-1
         
         ca1<-qt*Mt*r1p*R1/(Ht+r1p*(R1+r2p*R2))
         ca2<-qt*Mt*r2p*R2/(Ht+r2p*(R1+r2p*R2))
@@ -149,13 +157,6 @@ a.initial <- 1 # adults
 r1.initial <- 1 # shared resources
 r2.initial<- 1 # adult-specific resources
 
-# Set Parameters ---------------------------------------------------------------
-
-# enter name of temperature parameter
-temp.name <- "C"
-# choose range of temperatures
-temp.seq <- seq(Copt-10,Copt+10,length = 21)
-
 # Set Plot Preferences ---------------------------------------------------------
 
 # plot juvenile, adult, and resource dynamics?
@@ -182,7 +183,7 @@ if (dynamics.plot & b.plot) {
     par(mfcol=c(length(dynamics.to.plot)+length(b.vars),1),
         mar=c(2,3,2,1), mgp=c(1.5,0.5,0))
 } else if (dynamics.plot) {
-    # rows have dynamics plots for one value in temp.seq
+    # rows have dynamics plots for one value in C.seq
     par(mfcol=c(length(dynamics.to.plot),1),
         mar=c(2,3,2,1), mgp=c(1.5,0.5,0))
 } else if (b.plot) {
@@ -197,8 +198,16 @@ if (dynamics.plot & b.plot) {
 parms<-c(z=z, p=p, sig=sig, M=M, MS=MS, H=H, HS=HS, uJ=uJ, uJe=uJe, uA=uA, uAe=uAe,
          uR1=uR1, uR2=uR2, uR1e=uR1e, uR2e=uR2e, t=t, te=te, r1=r1, r2=r2,
          r1S=r1S, r2S=r2S, K1=K1, K2=K2, B=B, kb=kb, C=C, Copt=Copt)
-# find index of temperature to change
-temp.index <- which(names(parms)==temp.name)
+
+# determine repetition length
+repetitions.length <- length(C.seq)
+
+# create parameter matrix
+parms.matrix <- matrix(data=parms, nrow=length(parms), ncol=repetitions.length)
+row.names(parms.matrix) <- names(parms)
+
+# update temperature
+parms.matrix[C.name,] <- C.seq
 
 # initialize list to store output
 output <- list()
@@ -207,33 +216,30 @@ output <- list()
 y <- c(j.initial, a.initial, r1.initial, r2.initial)
 names(y) <- c("Juveniles", "Adults", "Shared Resources", "Adult Resources")
 
-# initialize parameters to change within loop
-parms.loop <- parms
-
 # loop to change temperature
-for (j in 1:length(temp.seq)) {
-    print(paste0("Starting simulation for ",temp.name,"=",temp.seq[j]))
+for (r in 1:repetitions.length) {
+    print(paste0("Starting simulation for repetition ",r))
     
     # set temperature
-    parms.loop[temp.index] <- temp.seq[j]
+    parms <- parms.matrix[,r]
 
     # run simulation
-    output[[j]] <- ode(y=y, time=iterations, BaseStaget, parms=parms.loop)
+    output[[r]] <- ode(y=y, time=iterations, BaseStaget, parms=parms)
     # remove time column
-    output[[j]] <- output[[j]][,-1]
+    output[[r]] <- output[[r]][,-1]
     # add juvenile to adult ratio
-    JARatio <- output[[j]][,"Juveniles"] / output[[j]][,"Adults"]
-    output[[j]] <- cbind(output[[j]], JARatio)
+    JARatio <- output[[r]][,"Juveniles"] / output[[r]][,"Adults"]
+    output[[r]] <- cbind(output[[r]], JARatio)
     
     # juvenile, adult, and resource dynamics plot
     if (dynamics.plot) {
-        if (sum(temp.seq[j]==dynamics.to.plot)==1) {
-            matplot(output[[j]][,1:4],type="l",lty=1,pch=0.5,col=1:4, xlab='', ylab='')
-            title(ylab=paste0(temp.name,"=",temp.seq[j]), cex.lab=1, font.lab=2)
+        if (sum(parms.matrix[C.name,r]==dynamics.to.plot)==1) {
+            matplot(output[[r]][,1:4],type="l",lty=1,pch=0.5,col=1:4, xlab='', ylab='')
+            title(ylab=paste0(C.name,"=",parms.matrix[C.name,r]), cex.lab=1, font.lab=2)
         }
     }
 
-} # end temp.seq loop
+} # end repetitions loop
 
 # bifurcation plot
 if (b.plot) {
@@ -250,15 +256,15 @@ if (b.plot) {
     
     for (b in b.vars) {
         # set up axes
-        plot(0, 0, pch = "", xlim = range(temp.seq), ylim = range.lim[,b],
+        plot(0, 0, pch = "", xlim = range(parms.matrix[C.name,]), ylim = range.lim[,b],
              xlab='', ylab=b)
         
         # plot points
-        for (j in 1:length(temp.seq)) {
+        for (j in 1:repetitions.length) {
             max.val <- max(output[[j]][b.rows,b])
             min.val <- min(output[[j]][b.rows,b])
             extrema.val <- c(min.val, max.val)
-            points(rep(temp.seq[j], length(extrema.val)), extrema.val)
+            points(rep(C.seq[j], length(extrema.val)), extrema.val)
         }
     }
     
