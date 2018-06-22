@@ -178,38 +178,17 @@ a.initial <- 1 # adults
 r1.initial <- 1 # shared resources
 r2.initial<- 1 # adult-specific resources
 
-# Set Plot Preferences ---------------------------------------------------------
+# Dynamics Plot Preferences ----------------------------------------------------
 
 # plot juvenile, adult, and resource dynamics?
 dynamics.plot = T
+
 if (dynamics.plot){
     # which dynamics to plot?
-    dynamics.to.plot <- c(Copt-10, Copt-5, Copt, Copt+5, Copt+10)  
-}
-
-# plot bifurcation plot?
-b.plot = T
-if (b.plot) {
-    # which state variable should be plotted in bifurcation plot?
-    b.vars <- c("JARatio", "Juveniles", "Adults")
-    # which proportion of iterations should be plotted in bifurcation plot?
-    # ex. 0.25 will plot last quarter of iterations
-    b.portion <- 0.5
-}
-
-# layout for plots
-if (dynamics.plot & b.plot) {
-    # starting rows have dynamics plots
-    # last rows have bifurcation plots
-    par(mfcol=c(length(dynamics.to.plot)+length(b.vars),1),
-        mar=c(2,3,2,1), mgp=c(1.5,0.5,0))
-} else if (dynamics.plot) {
-    # rows have dynamics plots for one value in C.seq
-    par(mfcol=c(length(dynamics.to.plot),1),
-        mar=c(2,3,2,1), mgp=c(1.5,0.5,0))
-} else if (b.plot) {
-    # rows have bifurcation plots
-    par(mfcol=c(length(b.vars),1),
+    C.dynamics.to.plot <- C.seq[c(-2,-4)]
+    r2p.dynamics.to.plot <- r2p.seq
+    # plot layout
+    par(mfcol=c(length(C.dynamics.to.plot),length(r2p.dynamics.to.plot)),
         mar=c(2,3,2,1), mgp=c(1.5,0.5,0))
 }
 
@@ -237,18 +216,37 @@ for (r in 1:repetitions.length) {
     JARatio <- output[[r]][,"Juveniles"] / output[[r]][,"Adults"]
     output[[r]] <- cbind(output[[r]], JARatio)
     
-    # juvenile, adult, and resource dynamics plot
+    # juvenile, adult, and resources dynamics plot
     if (dynamics.plot) {
-        if (sum(parms.matrix[C.name,r]==dynamics.to.plot)==1) {
+        # if parameter is included in parameters for dynamics to plot
+        if (sum(parms.matrix[C.name,r]==C.dynamics.to.plot)==1 &
+            sum(parms.matrix[r2p.name,r]==r2p.dynamics.to.plot)==1) {
+            # plot dynamics
             matplot(output[[r]][,1:4],type="l",lty=1,pch=0.5,col=1:4, xlab='', ylab='')
-            title(ylab=paste0(C.name,"=",parms.matrix[C.name,r]), cex.lab=1, font.lab=2)
+            title(ylab=paste0(C.name,"=",parms.matrix[C.name,r]), 
+                  main=paste0(r2p.name,"=",parms.matrix[r2p.name,r]),
+                  cex.lab=1, font.lab=2)
         }
     }
 
 } # end repetitions loop
 
+# Bifurcation Plots ------------------------------------------------------------
+
+# plot bifurcation plot?
+b.plot = T
+
 # bifurcation plot
 if (b.plot) {
+
+    # which state variable should be plotted in bifurcation plot?
+    b.vars <- c("JARatio", "Juveniles", "Adults")
+    # which proportion of iterations should be plotted in bifurcation plot?
+    # ex. 0.25 will plot last quarter of iterations
+    b.portion <- 0.5
+    
+    # plot layout
+    par(mfcol=c(length(b.vars),1), mar=c(2,3,2,1), mgp=c(1.5,0.5,0))
     
     # choose rows to plot
     total.rows <- length(iterations)
@@ -269,8 +267,10 @@ if (b.plot) {
         for (r in 1:repetitions.length) {
             max.val <- max(output[[r]][b.rows,b])
             min.val <- min(output[[r]][b.rows,b])
-            extrema.val <- c(min.val, max.val)
-            lines(rep(C.seq[r], length(extrema.val)), extrema.val, col=1)
+            # which.r2p used to assign colors and offset lines in plot
+            which.r2p <- which(r2p.seq==parms.matrix[r2p.name,r])
+            lines(x=rep(parms.matrix[C.name,r], 2)+which.r2p*0.1,
+                  y=c(min.val, max.val), col=which.r2p)
         }
     }
     
